@@ -1,0 +1,44 @@
+[
+  {
+    "dia": "15",
+    "mes": "ABR 2026",
+    "titulo": "Exitoso simulacro de evacuación en Escuela Los Andes",
+    "descripcion": "El personal de la Compañía B-120 realizó un simulacro de evacuación en la Escuela Los Andes, capacitando a más de 300 alumnos y docentes en procedimientos de emergencia y primeros auxilios.",
+    "etiqueta": "Prevención"
+  },
+  {
+    "dia": "10",
+    "mes": "ABR 2026",
+    "titulo": "Incorporación de nuevo vehículo de rescate",
+    "descripcion": "La compañía recibió una nueva unidad de rescate vehicular equipada con herramientas hidráulicas de última generación, mejorando nuestra capacidad de respuesta en accidentes de tránsito.",
+    "etiqueta": "Equipamiento"
+  },
+  {
+    "dia": "02",
+    "mes": "ABR 2026",
+    "titulo": "Curso de especialización en materiales peligrosos",
+    "descripcion": "Doce voluntarios completaron con éxito el curso de Hazmat nivel II, fortaleciendo las capacidades de nuestra unidad especializada en el control de derrames químicos y emergencias ambientales.",
+    "etiqueta": "Capacitación"
+  },
+  {
+    "dia": "28",
+    "mes": "MAR 2026",
+    "titulo": "Control de incendio forestal en sector norte",
+    "descripcion": "Tres unidades de la compañía actuaron durante 6 horas para controlar un incendio forestal que amenazaba viviendas del sector norte. Gracias a la rápida respuesta no se registraron víctimas.",
+    "etiqueta": "Operación"
+  },
+  {
+    "dia": "20",
+    "mes": "MAR 2026",
+    "titulo": "Jornada de puertas abiertas en el cuartel",
+    "descripcion": "Más de 200 vecinos visitaron nuestro cuartel durante la jornada de puertas abiertas, donde conocieron el trabajo diario de los voluntarios y los equipos utilizados en las emergencias.",
+    "etiqueta": "Comunidad"
+  },
+  {
+    "dia": "12",
+    "mes": "MAR 2026",
+    "titulo": "Reconocimiento al voluntario del año 2025",
+    "descripcion": "En una emotiva ceremonia, el voluntario Juan Pérez recibió el reconocimiento al Voluntario del Año 2025 por su destacada labor y dedicación durante más de 200 horas de servicio a la comunidad.",
+    "etiqueta": "Reconocimiento"
+  }
+]

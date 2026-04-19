@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel Admin - COMPAÑIA B-120</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #f0f0f0; }
+
+        /* ── Auth ── */
+        #auth-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-box img { height: 70px; margin-bottom: 15px; }
+
+        .auth-box h2 {
+            color: #d32f2f;
+            font-size: 1.8em;
+            margin-bottom: 6px;
+        }
+
+        .auth-box p { color: #888; margin-bottom: 25px; font-size: 0.95em; }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .auth-input:focus { outline: none; border-color: #d32f2f; }
+
+        .auth-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+
+        .auth-btn:hover { opacity: 0.88; }
+
+        .auth-error {
+            color: #d32f2f;
+            font-size: 0.88em;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ── Admin panel ── */
+        #admin-panel { padding-top: 75px; min-height: 100vh; background: #f5f5f5; }
+
+        .admin-header {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            padding: 14px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* ── Pantalla de carga inicial ── */
+        #init-loading {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #init-loading .spinner {
+            width: 44px; height: 44px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin2 0.8s linear infinite;
+        }
+        #init-loading p { color: white; font-size: 0.9em; opacity: 0.85; }
+        @keyframes spin2 { to { transform: rotate(360deg); } }
+
+        .admin-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 1.2em; font-weight: 700; }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.5);
+            padding: 7px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover { background: white; color: #d32f2f; }
+
+        .admin-content { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+
+        .admin-section {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+
+        .admin-section h2 {
+            color: #d32f2f;
+            font-size: 1.3em;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group { margin-bottom: 14px; }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 13px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus { outline: none; border-color: #d32f2f; }
+
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-size: 0.92em;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.3s;
+        }
+
+        .btn-primary:hover { opacity: 0.85; }
+
+        .btn-download {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            color: white;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-size: 0.92em;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.3s;
+        }
+
+        .btn-download:hover { opacity: 0.85; }
+
+        .btn-cancel {
+            background: #eee;
+            color: #444;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.92em;
+        }
+
+        /* ── News list ── */
+        .news-item-admin {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            gap: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .news-item-admin:hover { border-color: #d32f2f; }
+
+        .news-item-info { flex: 1; }
+
+        .news-item-info .item-date {
+            font-size: 0.78em;
+            color: #d32f2f;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .news-item-info h4 { font-size: 0.97em; color: #222; margin-bottom: 4px; }
+
+        .news-item-info p { font-size: 0.83em; color: #888; line-height: 1.4; }
+
+        .news-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 13px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-edit { background: #1565c0; color: white; }
+        .btn-delete { background: #c62828; color: white; }
+        .btn-edit:hover, .btn-delete:hover { opacity: 0.8; }
+
+        /* ── Role badge en header ── */
+        .rol-badge {
+            display: inline-block;
+            font-size: 0.55em;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 20px;
+            color: white;
+            vertical-align: middle;
+            letter-spacing: 1px;
+            margin-left: 10px;
+        }
+
+        /* ── Tags de rol en lista ── */
+        .rol-tag {
+            display: inline-block;
+            font-size: 0.75em;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+        .rol-tag.rol-efectivo    { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+        .rol-tag.rol-admin       { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+        .rol-tag.rol-super_admin { background: #ffebee; color: #b71c1c; border: 1px solid #ef9a9a; }
+
+        /* ── Postulaciones ── */
+        .postulacion-item {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+        .postulacion-item:hover { border-color: #d32f2f; }
+        .postulacion-item .pi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .postulacion-item .pi-nombre {
+            font-weight: 800;
+            font-size: 1.05em;
+            color: #1a1a1a;
+        }
+        .postulacion-item .pi-estado {
+            font-size: 0.78em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .pi-estado.pendiente { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+        .pi-estado.aceptado  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .pi-estado.rechazado { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+        .pi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 6px 16px;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .pi-grid span b { color: #222; }
+        .pi-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .btn-aceptar { background: #2e7d32; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82em; font-weight: 700; cursor: pointer; }
+        .btn-rechazar { background: #c62828; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82em; font-weight: 700; cursor: pointer; }
+        .btn-aceptar:hover, .btn-rechazar:hover { opacity: 0.8; }
+
+        /* ── Instructions ── */
+        .instructions-box {
+            background: rgba(211,47,47,0.06);
+            border: 2px solid rgba(211,47,47,0.2);
+            border-radius: 10px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+        }
+
+        .instructions-box h3 { color: #d32f2f; margin-bottom: 8px; font-size: 0.98em; }
+
+        .instructions-box ol {
+            margin: 0;
+            padding-left: 20px;
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.9;
+        }
+
+        .success-msg {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 2px solid #a5d6a7;
+            border-radius: 8px;
+            padding: 11px 18px;
+            margin-bottom: 14px;
+            font-weight: 600;
+            display: none;
+            font-size: 0.92em;
+        }
+
+        /* ── Modal ── */
+        #edit-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #edit-modal-overlay.visible { display: flex; }
+
+        .edit-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin: 20px;
+        }
+
+        .edit-modal h3 { color: #d32f2f; margin-bottom: 18px; font-size: 1.25em; }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .news-item-admin { flex-direction: column; }
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+
+    <!-- ── Carga inicial (tapa todo hasta que Firebase resuelva) ── -->
+    <div id="init-loading">
+        <div class="spinner"></div>
+        <p>Verificando acceso...</p>
+    </div>
+
+    <!-- ── Panel de administración ── -->
+    <div id="admin-panel" style="display:none;">
+
+        <header class="admin-header">
+            <div class="container">
+                <h1>Panel Admin — Compañía B-120 <span id="rol-badge" class="rol-badge"></span></h1>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <a href="noticias.html" style="color:rgba(255,255,255,0.8); font-size:0.85em; text-decoration:none;">← Volver al sitio</a>
+                    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+
+            <!-- Gestión de efectivos (admin + super_admin) -->
+                <div class="admin-section" id="section-usuarios">
+                    <h2>Gestión de efectivos</h2>
+                    <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Administra los grados y roles de los efectivos registrados.</p>
+                    <div id="users-admin-list">
+                        <p style="color:#aaa;">Cargando efectivos...</p>
+                    </div>
+                </div>
+
+                <!-- Gestión avanzada (solo super_admin) -->
+                <div class="admin-section" id="section-superadmin" style="display:none; border: 2px solid #d32f2f;">
+                    <h2 style="color:#d32f2f;">Control Total — Admin</h2>
+                    <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Puedes cambiar cualquier rol, eliminar efectivos y ver toda la información del sistema.</p>
+                    <div id="superadmin-users-list">
+                        <p style="color:#aaa;">Cargando...</p>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+    <!-- Sin sesión: redirigir al portal -->
+    <div id="no-access" style="display:none; min-height:100vh; background:linear-gradient(135deg,#d32f2f,#b71c1c); display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px;">
+        <p style="color:white; font-size:1.1em;">Debes iniciar sesión como administrador.</p>
+        <a href="efectivos.html" style="background:rgba(255,255,255,0.2); color:white; padding:10px 24px; border-radius:8px; text-decoration:none; font-weight:700;">Ir al Portal</a>
+    </div>
+
+    <script>
+        var currentUserRol = null;
+
+        var GRADOS = ['Postulante','Seccionario','Sub Teniente','Teniente','Teniente Brigadier','Brigadier'];
+        var ROLES_LABEL = { 'efectivo': 'Efectivo', 'admin': 'Administrador', 'super_admin': 'Administrador' };
+
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        function switchTab(tab) {
+            var isPost = tab === 'postulaciones';
+            document.getElementById('tab-efectivos').style.display      = isPost ? 'none' : 'block';
+            document.getElementById('tab-postulaciones').style.display  = isPost ? 'block' : 'none';
+
+            var btnE = document.getElementById('tab-btn-efectivos');
+            var btnP = document.getElementById('tab-btn-postulaciones');
+            btnE.style.color       = isPost ? '#aaa'    : '#d32f2f';
+            btnE.style.borderBottomColor = isPost ? 'transparent' : '#d32f2f';
+            btnP.style.color       = isPost ? '#d32f2f' : '#aaa';
+            btnP.style.borderBottomColor = isPost ? '#d32f2f' : 'transparent';
+        }
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        async function logout() {
+            await auth.signOut();
+            window.location.replace('noticias.html');
+        }
+
+        // ── Mostrar panel ─────────────────────────────────────────────────────
+        function showAdminPanel() {
+            document.getElementById('admin-panel').style.display = 'block';
+            var badge = document.getElementById('rol-badge');
+            badge.textContent = 'ADMINISTRADOR';
+            badge.style.background = currentUserRol === 'super_admin' ? '#b71c1c' : '#555';
+            if (currentUserRol === 'super_admin') {
+                document.getElementById('section-superadmin').style.display = 'block';
+                loadSuperAdminUsers();
+            }
+            loadUsers();
+        }
+
+        // ── Cargar usuarios (admin y super_admin ven lista con cambio de grado) ─
+        function loadUsers() {
+            db.collection('usuarios').onSnapshot(function(snap) {
+                var container = document.getElementById('users-admin-list');
+                if (snap.empty) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay efectivos registrados.</p>';
+                    return;
+                }
+                var html = '';
+                snap.forEach(function(doc) {
+                    var u = doc.data();
+                    var rolLabel = ROLES_LABEL[u.rol] || u.rol;
+                    var gradoOpts = GRADOS.map(function(g) {
+                        return '<option value="'+g+'"'+(u.grado===g?' selected':'')+'>'+g+'</option>';
+                    }).join('');
+                    html += '<div class="news-item-admin">' +
+                        '<div class="news-item-info">' +
+                            '<div class="item-date"><span class="rol-tag rol-'+u.rol+'">'+rolLabel+'</span></div>' +
+                            '<h4>' + u.nombre + ' ' + u.apellido + '</h4>' +
+                            '<p>DNI: ' + u.rut + ' | Correo: ' + u.email + ' | Ingreso: ' + u.anio + '</p>' +
+                        '</div>' +
+                        '<div class="news-item-actions" style="flex-direction:column;align-items:flex-end;gap:6px">' +
+                            '<select onchange="cambiarGrado(\''+doc.id+'\',this.value)" style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:0.82em;">' + gradoOpts + '</select>' +
+                            (u.rol !== 'admin' && u.rol !== 'super_admin'
+                                ? '<button class="btn-primary" style="padding:5px 11px;font-size:0.8em;" onclick="setRol(\''+doc.id+'\',\'admin\')">Hacer admin</button>'
+                                : (u.rol === 'admin' && currentUserRol === 'super_admin' ? '<button class="btn-edit" style="font-size:0.8em;" onclick="setRol(\''+doc.id+'\',\'efectivo\')">Quitar admin</button>' : '')
+                            ) +
+                        '</div>' +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // ── Cambiar grado ─────────────────────────────────────────────────────
+        async function cambiarGrado(uid, nuevoGrado) {
+            await db.collection('usuarios').doc(uid).update({ grado: nuevoGrado });
+        }
+
+        // ── Cambiar rol ───────────────────────────────────────────────────────
+        async function setRol(uid, nuevoRol) {
+            var labels = { admin: 'administrador', efectivo: 'efectivo', super_admin: 'administrador' };
+            if (!confirm('¿Cambiar rol a ' + (labels[nuevoRol]||nuevoRol) + '?')) return;
+            await db.collection('usuarios').doc(uid).update({ rol: nuevoRol });
+        }
+
+        // ── Gestión completa solo super_admin ─────────────────────────────────
+        function loadSuperAdminUsers() {
+            db.collection('usuarios').onSnapshot(function(snap) {
+                var container = document.getElementById('superadmin-users-list');
+                if (snap.empty) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay efectivos.</p>';
+                    return;
+                }
+                var html = '';
+                snap.forEach(function(doc) {
+                    var u = doc.data();
+                    var rolLabel = ROLES_LABEL[u.rol] || u.rol;
+                    var rolesOpts = ['efectivo','admin','super_admin'].map(function(r) {
+                        return '<option value="'+r+'"'+(u.rol===r?' selected':'')+'>'+ROLES_LABEL[r]+'</option>';
+                    }).join('');
+                    html += '<div class="news-item-admin" style="border-color:#d32f2f33">' +
+                        '<div class="news-item-info">' +
+                            '<div class="item-date"><span class="rol-tag rol-'+u.rol+'">'+rolLabel+'</span> &mdash; '+u.grado+'</div>' +
+                            '<h4>' + u.nombre + ' ' + u.apellido + '</h4>' +
+                            '<p>DNI: ' + u.rut + ' | Correo: ' + u.email + ' | Ingreso: ' + u.anio + '</p>' +
+                        '</div>' +
+                        '<div class="news-item-actions" style="flex-direction:column;align-items:flex-end;gap:6px">' +
+                            '<select onchange="setRol(\''+doc.id+'\',this.value)" style="padding:5px 8px;border-radius:6px;border:2px solid #d32f2f;font-size:0.82em;">' + rolesOpts + '</select>' +
+                            '<button class="btn-delete" style="font-size:0.8em;" onclick="eliminarEfectivo(\''+doc.id+'\',\''+u.nombre+' '+u.apellido+'\')">Eliminar</button>' +
+                        '</div>' +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // ── Eliminar efectivo (solo super_admin) ──────────────────────────────
+        async function eliminarEfectivo(uid, nombre) {
+            if (!confirm('¿Eliminar permanentemente a ' + nombre + '? Esta acción no se puede deshacer.')) return;
+            await db.collection('usuarios').doc(uid).delete();
+        }
+
+        // ── Auth observer ─────────────────────────────────────────────────────
+        function hideLoading() {
+            document.getElementById('init-loading').style.display = 'none';
+        }
+
+        auth.onAuthStateChanged(async function(user) {
+            if (!user) {
+                hideLoading();
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('no-access').style.display   = 'flex';
+                currentUserRol = null;
+                return;
+            }
+            // Si ya está logueado (sesión activa), verificar rol desde Firestore
+            if (!currentUserRol) {
+                var snap = await db.collection('usuarios').doc(user.uid).get();
+                var rol  = snap.exists ? snap.data().rol : '';
+                if (rol !== 'admin' && rol !== 'super_admin') {
+                    await auth.signOut();
+                    hideLoading();
+                    document.getElementById('no-access').style.display = 'flex';
+                    return;
+                }
+                currentUserRol = rol;
+                hideLoading();
+                showAdminPanel();
+            }
+        });
+
+        // Evitar que bfcache restaure el panel visible al presionar "atrás"
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted) {
+                document.getElementById('init-loading').style.display = 'flex';
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('no-access').style.display   = 'none';
+                currentUserRol = null;
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Cursos y Manuales - Compañía de Bomberos B-120">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cursos y Manuales - COMPAÑIA B-120</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Panel admin inline ── */
+        #admin-toolbar {
+            display: none;
+            background: #fff8f8;
+            border: 2px solid #ef9a9a;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+        }
+        .admin-badge {
+            background: #d32f2f;
+            color: white;
+            font-size: 0.78em;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .admin-toolbar-btn {
+            background: white;
+            color: #d32f2f;
+            border: 2px solid #ef9a9a;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-block;
+        }
+        .admin-toolbar-btn:hover { background: #ffebee; border-color: #d32f2f; color: #d32f2f; }
+        .admin-toolbar-btn.danger { color: #888; border-color: #ddd; }
+        .admin-toolbar-btn.danger:hover { background: #f5f5f5; border-color: #aaa; color: #555; }
+        .admin-toolbar-spacer { flex: 1; }
+
+        /* ── Sección cursos ── */
+        .cursos-section {
+            padding: 60px 0;
+            background: #fafafa;
+            min-height: 60vh;
+        }
+        .cursos-section h2 {
+            text-align: center;
+            font-size: 2em;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        .cursos-subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.97em;
+            margin-bottom: 40px;
+        }
+        .cursos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .curso-card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            padding: 28px 24px;
+            border-left: 4px solid #d32f2f;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .curso-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+        }
+        .curso-card-icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+        .curso-card h3 {
+            font-size: 1.08em;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .curso-card p {
+            color: #666;
+            font-size: 0.91em;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .curso-card-link {
+            display: inline-block;
+            background: #d32f2f;
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 7px;
+            font-size: 0.84em;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .curso-card-link:hover { background: #b71c1c; }
+
+        .cursos-empty {
+            text-align: center;
+            color: #aaa;
+            padding: 60px 0;
+            font-size: 1em;
+        }
+
+        /* ── Admin: botones en cards ── */
+        .curso-card-admin-actions {
+            display: none;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .admin-mode .curso-card-admin-actions { display: flex; }
+        .btn-card-edit, .btn-card-delete {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-card-edit   { background: #e3f2fd; color: #1565c0; }
+        .btn-card-edit:hover { background: #bbdefb; }
+        .btn-card-delete { background: #ffebee; color: #c62828; }
+        .btn-card-delete:hover { background: #ffcdd2; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 28px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box h3 { margin-bottom: 20px; font-size: 1.15em; color: #1a1a1a; }
+        .mfg { margin-bottom: 16px; }
+        .mfg label { display: block; font-size: 0.85em; font-weight: 700; color: #555; margin-bottom: 5px; }
+        .mfg input, .mfg textarea, .mfg select {
+            width: 100%; padding: 10px 13px;
+            border: 2px solid #e0e0e0; border-radius: 8px;
+            font-size: 0.94em; font-family: inherit;
+            box-sizing: border-box; transition: border-color 0.2s;
+        }
+        .mfg input:focus, .mfg textarea:focus, .mfg select:focus { border-color: #d32f2f; outline: none; }
+        .modal-success { color: #2e7d32; font-weight: 700; font-size: 0.9em; margin-top: 6px; display: none; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-modal-save {
+            background: #d32f2f; color: #fff; border: none;
+            padding: 10px 22px; border-radius: 8px;
+            font-weight: 700; font-size: 0.9em; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-modal-save:hover { background: #b71c1c; }
+        .btn-modal-cancel {
+            background: #f5f5f5; color: #555; border: none;
+            padding: 10px 18px; border-radius: 8px;
+            font-weight: 600; font-size: 0.9em; cursor: pointer;
+        }
+        .btn-modal-cancel:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
+                <span class="company-name">COMPAÑIA B-120</span>
+            </div>
+            <nav class="nav">
+                <ul class="menu">
+                    <li><a href="index.html">INICIO</a></li>
+                    <li class="menu-dropdown">
+                        <a href="nosotros.html">NOSOTROS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="postula.html">Postula a la B-120</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="servicios.html">SERVICIOS</a></li>
+                    <li><a href="himnos.html">HIMNOS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="noticias.html" class="active">NOTICIAS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cursos.html">Cursos y Manuales</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="contacto.html">CONTACTO</a></li>
+                    <li><a href="efectivos.html" class="menu-portal">LOGIN</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="cursos-section">
+            <div class="container">
+                <!-- Panel admin inline -->
+                <div id="admin-toolbar" style="display:none;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <button class="admin-toolbar-btn" onclick="showAddModal()">+ Agregar curso / manual</button>
+                        <span class="admin-toolbar-spacer"></span>
+                        <button class="admin-toolbar-btn danger" onclick="adminLogout()">Cerrar sesión</button>
+                    </div>
+                </div>
+
+                <h2>CURSOS Y MANUALES</h2>
+                <p class="cursos-subtitle">Descarga aquí los cursos, manuales y materiales útiles para la Compañía de Bomberos B-120. Si tienes un archivo para compartir, indícalo al administrador.</p>
+
+                <!-- Cards fijas -->
+                <div class="cursos-grid" style="margin-bottom:24px;">
+                    <div class="curso-card">
+                        <div class="curso-card-icon"></div>
+                        <h3>Curso de Formación Básica de Bomberos</h3>
+                        <p style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">Curso</p>
+                        <a class="curso-card-link" href="https://drive.google.com/file/d/12YdLRe3ExygRB-HpdmC3q52yX4hvAkoz/view?usp=drive_link" target="_blank" rel="noopener">Ver / Descargar</a>
+                    </div>
+                </div>
+
+                <div id="cursos-list" class="cursos-grid">
+                    <p class="cursos-empty">Cargando...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ── Modal: Agregar curso / manual ── -->
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>+ Agregar curso / manual</h3>
+            <div class="mfg">
+                <label>Tipo</label>
+                <select id="add-tipo">
+                    <option value="Curso">Curso</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Documento">Documento</option>
+                </select>
+            </div>
+            <div class="mfg">
+                <label>Título</label>
+                <input type="text" id="add-titulo" placeholder="Ej: Primeros Auxilios Avanzado">
+            </div>
+            <div class="mfg">
+                <label>Descripción</label>
+                <textarea id="add-descripcion" rows="3" placeholder="Breve descripción del contenido..."></textarea>
+            </div>
+            <div class="mfg">
+                <label>Enlace (URL) <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
+                <input type="url" id="add-url" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="modal-success" id="add-success">Agregado correctamente.</div>
+            <div class="modal-btns">
+                <button class="btn-modal-save" id="add-btn-save" onclick="saveAdd()">AGREGAR</button>
+                <button class="btn-modal-cancel" onclick="closeAddModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Modal: Editar ── -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Editar curso / manual</h3>
+            <div class="mfg">
+                <label>Tipo</label>
+                <select id="edit-tipo">
+                    <option value="Curso">Curso</option>
+                    <option value="Manual">Manual</option>
+                    <option value="Documento">Documento</option>
+                </select>
+            </div>
+            <div class="mfg">
+                <label>Título</label>
+                <input type="text" id="edit-titulo">
+            </div>
+            <div class="mfg">
+                <label>Descripción</label>
+                <textarea id="edit-descripcion" rows="3"></textarea>
+            </div>
+            <div class="mfg">
+                <label>Enlace (URL)</label>
+                <input type="url" id="edit-url">
+            </div>
+            <div class="modal-btns">
+                <button class="btn-modal-save" onclick="saveEdit()">GUARDAR CAMBIOS</button>
+                <button class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        var currentUserRol = null;
+        var editDocId = null;
+        var unsubCursos = null;
+
+        var TIPO_ICON = { 'Curso': '', 'Manual': '', 'Documento': '' };
+
+        // ── Renderizar cards ──────────────────────────────────────────────────
+        function renderCursos(snap) {
+            var lista = document.getElementById('cursos-list');
+            if (snap.empty) {
+                lista.innerHTML = '<p class="cursos-empty">No hay cursos o manuales publicados todavía.</p>';
+                return;
+            }
+            var html = '';
+            snap.forEach(function(doc) {
+                var c = doc.data();
+                var icon = TIPO_ICON[c.tipo] || '';
+                var linkBtn = c.url
+                    ? '<a class="curso-card-link" href="' + c.url + '" target="_blank" rel="noopener">Ver / Descargar</a>'
+                    : '';
+                html +=
+                    '<div class="curso-card">' +
+                        '<div class="curso-card-icon">' + icon + '</div>' +
+                        '<h3>' + (c.titulo || '') + '</h3>' +
+                        (c.tipo ? '<p style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">' + c.tipo + '</p>' : '') +
+                        (c.descripcion ? '<p>' + c.descripcion + '</p>' : '') +
+                        linkBtn +
+                        '<div class="curso-card-admin-actions">' +
+                            '<button class="btn-card-edit" onclick="openEdit(\'' + doc.id + '\')">Editar</button>' +
+                            '<button class="btn-card-delete" onclick="deleteCurso(\'' + doc.id + '\', \'' + (c.titulo || '').replace(/'/g, "\\'") + '\')">Quitar</button>' +
+                        '</div>' +
+                    '</div>';
+            });
+            lista.innerHTML = html;
+        }
+
+        // ── Cargar ────────────────────────────────────────────────────────────
+        function loadCursos(adminMode) {
+            if (unsubCursos) { unsubCursos(); unsubCursos = null; }
+            var query = db.collection('cursos').orderBy('timestamp', 'desc');
+            if (adminMode) {
+                unsubCursos = query.onSnapshot(renderCursos);
+            } else {
+                query.get().then(renderCursos).catch(function() {
+                    document.getElementById('cursos-list').innerHTML =
+                        '<p class="cursos-empty">No se pudo cargar el contenido.</p>';
+                });
+            }
+        }
+
+        // ── Auth state ────────────────────────────────────────────────────────
+        auth.onAuthStateChanged(async function(user) {
+            if (user) {
+                var snap = await db.collection('usuarios').doc(user.uid).get();
+                var rol  = snap.exists ? snap.data().rol : '';
+                if (rol === 'admin' || rol === 'super_admin') {
+                    currentUserRol = rol;
+                    document.body.classList.add('admin-mode');
+                    document.getElementById('admin-toolbar').style.display = 'block';
+                    var badgeLabel = document.getElementById('admin-badge-label');
+                    if (badgeLabel) badgeLabel.textContent = 'ADMIN';
+                    var portalLink = document.getElementById('nav-portal-link');
+                    if (portalLink) {
+                        portalLink.textContent = snap.data().nombre || 'MI PORTAL';
+                        portalLink.href = 'efectivos.html';
+                    }
+                    loadCursos(true);
+                    return;
+                }
+            }
+            currentUserRol = null;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('admin-toolbar').style.display = 'none';
+            loadCursos(false);
+
+        });
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        async function adminLogout() {
+            await auth.signOut();
+            window.location.reload();
+        }
+
+        // ── Modal agregar ─────────────────────────────────────────────────────
+        function showAddModal() {
+            document.getElementById('add-tipo').value = 'Curso';
+            ['add-titulo', 'add-descripcion', 'add-url'].forEach(function(id) {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('add-success').style.display = 'none';
+            document.getElementById('add-modal').classList.add('visible');
+        }
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('visible');
+        }
+        async function saveAdd() {
+            var titulo      = document.getElementById('add-titulo').value.trim();
+            var tipo        = document.getElementById('add-tipo').value;
+            var descripcion = document.getElementById('add-descripcion').value.trim();
+            var url         = document.getElementById('add-url').value.trim();
+            if (!titulo) { alert('El título es obligatorio.'); return; }
+            var btn = document.getElementById('add-btn-save');
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            await db.collection('cursos').add({
+                titulo: titulo, tipo: tipo, descripcion: descripcion, url: url,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            btn.disabled = false; btn.textContent = 'AGREGAR';
+            document.getElementById('add-success').style.display = 'block';
+            setTimeout(closeAddModal, 1200);
+        }
+
+        // ── Modal editar ──────────────────────────────────────────────────────
+        async function openEdit(docId) {
+            editDocId = docId;
+            var snap = await db.collection('cursos').doc(docId).get();
+            var c = snap.data();
+            document.getElementById('edit-tipo').value        = c.tipo        || 'Curso';
+            document.getElementById('edit-titulo').value      = c.titulo      || '';
+            document.getElementById('edit-descripcion').value = c.descripcion || '';
+            document.getElementById('edit-url').value         = c.url         || '';
+            document.getElementById('edit-modal').classList.add('visible');
+        }
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('visible');
+            editDocId = null;
+        }
+        async function saveEdit() {
+            if (!editDocId) return;
+            var titulo = document.getElementById('edit-titulo').value.trim();
+            if (!titulo) { alert('El título es obligatorio.'); return; }
+            await db.collection('cursos').doc(editDocId).update({
+                tipo:        document.getElementById('edit-tipo').value,
+                titulo:      titulo,
+                descripcion: document.getElementById('edit-descripcion').value.trim(),
+                url:         document.getElementById('edit-url').value.trim()
+            });
+            closeEditModal();
+        }
+
+        // ── Eliminar ──────────────────────────────────────────────────────────
+        async function deleteCurso(docId, titulo) {
+            if (!confirm('¿Quitar "' + titulo + '"? Esta acción no se puede deshacer.')) return;
+            await db.collection('cursos').doc(docId).delete();
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

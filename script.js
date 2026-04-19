@@ -1,4 +1,4 @@
-// Menú hamburguesa
+// Menú 
 const menuToggle = document.getElementById('menu-toggle');
 const menu = document.querySelector('.menu');
 
@@ -39,22 +39,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-    highlightActiveLink();
 
-    // Mejorar el scroll suave para navegadores que no lo soportan
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
-
-            if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 80; // Ajuste para header fijo
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-});

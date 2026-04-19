@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Formulario de Postulación - Compañía de Bomberos B-120">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formulario de Postulación - COMPAÑIA B-120</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
+                <span class="company-name">COMPAÑIA B-120</span>
+            </div>
+            <nav class="nav">
+                <ul class="menu">
+                    <li><a href="index.html">INICIO</a></li>
+                    <li class="menu-dropdown">
+                        <a href="nosotros.html">NOSOTROS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="postula.html">Postula a la B-120</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="servicios.html">SERVICIOS</a></li>
+                    <li><a href="himnos.html">HIMNOS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="noticias.html">NOTICIAS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cursos.html">Cursos y Manuales</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="contacto.html">CONTACTO</a></li>
+                    <li><a href="efectivos.html" class="menu-portal">LOGIN</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="services">
+            <div class="container">
+                <h2>FORMULARIO DE POSTULACIÓN</h2>
+                <p class="services-intro">Completa el formulario con tus datos personales para iniciar el proceso de postulación a la Compañía de Bomberos B-120.</p>
+
+                <form id="form-postulacion" class="postulacion-form">
+
+                    <div class="form-section-title">Datos Personales</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombres">Nombres *</label>
+                            <input type="text" id="nombres" name="nombres" placeholder="Ej: Juan Carlos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos">Apellidos *</label>
+                            <input type="text" id="apellidos" name="apellidos" placeholder="Ej: Pérez García" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_nacimiento">Fecha de Nacimiento *</label>
+                            <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="genero">Género *</label>
+                            <select id="genero" name="genero" required>
+                                <option value="">Selecciona...</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dni">DNI *</label>
+                            <input type="text" id="dni" name="dni" placeholder="Ej: 12345678" maxlength="8" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono *</label>
+                            <input type="tel" id="telefono" name="telefono" placeholder="Ej: 987654321" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico *</label>
+                            <input type="email" id="email" name="email" placeholder="Ej: correo@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion">Dirección *</label>
+                            <input type="text" id="direccion" name="direccion" placeholder="Ej: Av. Los Pinos 123" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="distrito">Distrito *</label>
+                            <input type="text" id="distrito" name="distrito" placeholder="Ej: San Juan de Miraflores" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Datos Físicos</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="estatura">Estatura (cm) *</label>
+                            <input type="number" id="estatura" name="estatura" placeholder="Ej: 170" min="100" max="250" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="peso">Peso (kg) *</label>
+                            <input type="number" id="peso" name="peso" placeholder="Ej: 70" min="30" max="200" required>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Datos Académicos y Laborales</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="grado_instruccion">Grado de Instrucción</label>
+                            <select id="grado_instruccion" name="grado_instruccion">
+                                <option value="">Selecciona...</option>
+                                <option value="primaria">Primaria</option>
+                                <option value="secundaria">Secundaria</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="universitario">Universitario</option>
+                                <option value="postgrado">Postgrado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="centro_estudios">Centro de Estudios</label>
+                            <input type="text" id="centro_estudios" name="centro_estudios" placeholder="Ej: UNMSM">
+                        </div>
+                        <div class="form-group">
+                            <label for="que_estudia">¿Qué Estudias?</label>
+                            <input type="text" id="que_estudia" name="que_estudia" placeholder="Ej: Ingeniería Civil">
+                        </div>
+                        <div class="form-group">
+                            <label for="trabajo_oficio">Trabajo u Oficio</label>
+                            <input type="text" id="trabajo_oficio" name="trabajo_oficio" placeholder="Ej: Técnico en electricidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="empresa">Empresa donde Labora</label>
+                            <input type="text" id="empresa" name="empresa" placeholder="Ej: Empresa ABC S.A.C.">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Documentos</div>
+                    <div class="form-grid">
+                        <div class="form-group file-upload-group">
+                            <label for="certificado_laboral">Certificado Único Laboral</label>
+                            <div class="file-upload-box" id="box-certificado" onclick="document.getElementById('certificado_laboral').click()">
+                                <span class="file-upload-icon"></span>
+                                <span class="file-upload-text" id="txt-certificado">Haz clic para adjuntar archivo</span>
+                                <span class="file-upload-hint">PDF, DOC o DOCX — máx. 5 MB</span>
+                            </div>
+                            <input type="file" id="certificado_laboral" name="certificado_laboral" accept=".pdf,.doc,.docx" style="display:none" onchange="mostrarNombreArchivo('certificado_laboral','txt-certificado','box-certificado')">
+                        </div>
+                        <div class="form-group file-upload-group">
+                            <label for="curriculum_vitae">Curriculum Vitae</label>
+                            <div class="file-upload-box" id="box-curriculum" onclick="document.getElementById('curriculum_vitae').click()">
+                                <span class="file-upload-icon"></span>
+                                <span class="file-upload-text" id="txt-curriculum">Haz clic para adjuntar archivo</span>
+                                <span class="file-upload-hint">PDF, DOC o DOCX — máx. 5 MB</span>
+                            </div>
+                            <input type="file" id="curriculum_vitae" name="curriculum_vitae" accept=".pdf,.doc,.docx" style="display:none" onchange="mostrarNombreArchivo('curriculum_vitae','txt-curriculum','box-curriculum')">
+                        </div>
+                    </div>
+
+                    <div style="text-align:center; margin-top: 30px;">
+                        <button type="submit" class="postula-btn">ENVIAR POSTULACIÓN</button>
+                    </div>
+
+                    <p id="form-msg" style="text-align:center; margin-top:16px; font-weight:600; display:none;"></p>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 26 de abril de 1987 Compañía de Bomberos B-120. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        const storage = firebase.storage();
+
+        function mostrarNombreArchivo(inputId, textoId, boxId) {
+            var file = document.getElementById(inputId).files[0];
+            var txt  = document.getElementById(textoId);
+            var box  = document.getElementById(boxId);
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo no debe superar 5 MB.');
+                    document.getElementById(inputId).value = '';
+                    txt.textContent = 'Haz clic para adjuntar archivo';
+                    box.classList.remove('file-upload-box--selected');
+                    return;
+                }
+                txt.textContent = file.name;
+                box.classList.add('file-upload-box--selected');
+            }
+        }
+
+        async function subirArchivo(storageRef, file) {
+            if (!file) return null;
+            var snapshot = await storageRef.put(file);
+            return await snapshot.ref.getDownloadURL();
+        }
+
+        document.getElementById('form-postulacion').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var msg = document.getElementById('form-msg');
+            var btn = this.querySelector('button[type=submit]');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+            msg.style.display = 'none';
+
+            try {
+                var docRef = db.collection('postulaciones').doc();
+                var fileCert = document.getElementById('certificado_laboral').files[0] || null;
+                var fileCV   = document.getElementById('curriculum_vitae').files[0] || null;
+
+                var certUrl = null;
+                var cvUrl   = null;
+
+                if (fileCert) {
+                    btn.textContent = 'Subiendo certificado...';
+                    certUrl = await subirArchivo(
+                        storage.ref('postulaciones/' + docRef.id + '/certificado_laboral'),
+                        fileCert
+                    );
+                }
+                if (fileCV) {
+                    btn.textContent = 'Subiendo curriculum...';
+                    cvUrl = await subirArchivo(
+                        storage.ref('postulaciones/' + docRef.id + '/curriculum_vitae'),
+                        fileCV
+                    );
+                }
+
+                btn.textContent = 'Guardando datos...';
+                var datos = {
+                    nombres:            document.getElementById('nombres').value.trim(),
+                    apellidos:          document.getElementById('apellidos').value.trim(),
+                    fecha_nacimiento:   document.getElementById('fecha_nacimiento').value,
+                    genero:             document.getElementById('genero').value,
+                    dni:                document.getElementById('dni').value.trim(),
+                    telefono:           document.getElementById('telefono').value.trim(),
+                    email:              document.getElementById('email').value.trim(),
+                    direccion:          document.getElementById('direccion').value.trim(),
+                    distrito:           document.getElementById('distrito').value.trim(),
+                    estatura:           document.getElementById('estatura').value,
+                    peso:               document.getElementById('peso').value,
+                    grado_instruccion:  document.getElementById('grado_instruccion').value,
+                    centro_estudios:    document.getElementById('centro_estudios').value.trim(),
+                    trabajo_oficio:     document.getElementById('trabajo_oficio').value.trim(),
+                    empresa:            document.getElementById('empresa').value.trim(),
+                    certificado_url:    certUrl,
+                    curriculum_url:     cvUrl,
+                    timestamp:          firebase.firestore.FieldValue.serverTimestamp(),
+                    estado:             'pendiente'
+                };
+
+                await docRef.set(datos);
+
+                msg.style.color = '#2e7d32';
+                msg.textContent = '¡Postulación enviada con éxito! Nos comunicaremos contigo pronto.';
+                msg.style.display = 'block';
+                document.getElementById('form-postulacion').reset();
+                ['txt-certificado','txt-curriculum'].forEach(function(id) {
+                    document.getElementById(id).textContent = 'Haz clic para adjuntar archivo';
+                });
+                ['box-certificado','box-curriculum'].forEach(function(id) {
+                    document.getElementById(id).classList.remove('file-upload-box--selected');
+                });
+                btn.textContent = 'ENVIAR POSTULACIÓN';
+                btn.disabled = false;
+            } catch(err) {
+                msg.style.color = '#d32f2f';
+                msg.textContent = 'Ocurrió un error al enviar. Inténtalo nuevamente.';
+                msg.style.display = 'block';
+                btn.textContent = 'ENVIAR POSTULACIÓN';
+                btn.disabled = false;
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -12,35 +12,85 @@
     <header class="header">
         <div class="container">
             <div class="logo-container">
-                <img class="logo" src="logo.jpg" alt="Escudo Compañía B-120">
+                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
                 <span class="company-name">COMPAÑIA B-120</span>
             </div>
             <nav class="nav">
                 <ul class="menu">
                     <li><a href="index.html">INICIO</a></li>
-                    <li><a href="nosotros.html">NOSOTROS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="nosotros.html">NOSOTROS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="postula.html">Postula a la B-120</a></li>
+                        </ul>
+                    </li>
                     <li><a href="servicios.html">SERVICIOS</a></li>
                     <li><a href="himnos.html">HIMNOS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="noticias.html">NOTICIAS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cursos.html">Cursos y Manuales</a></li>
+                        </ul>
+                    </li>
                     <li><a href="contacto.html" class="active">CONTACTO</a></li>
+                    <li><a href="efectivos.html" class="menu-portal">LOGIN</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <main>
-        <section class="contact">
-            <div class="container">
-               <h4><h2>CONTACTO</h2></h4> 
-                <h4><p>Para emergencias, llame al: <strong>116</strong></p></h4><br>
-               <h4><p>Direccion:</p></h4><br>
-                <a href="https://www.google.com/maps?q=Pedro+Miota+con+Jr+Paita+San+Juan+de+Miraflores+Lima+Peru" target="_blank"> Pedro Miota con Jr. Paita, San Juan de Miraflores, Lima, Perú<br></a>
-              <br>
-</a>
-                <h4><p>Teléfono: +51 1 2765961</p></h4><br>
-                <h4><p>Email:</p></h4><br>
-               <a href="mailto:b-120@bomberosperu.gob.pe?subject=Consulta&body=Hola, quiero información">b-120@bomberosperu.gob.pe</a><br>
-               <br>
-                <h4><p>Horario de atención: 24/7</p></h4><br>
+        <section class="contact contact-minimal">
+            <div class="contact-minicard">
+                <div class="contact-minicard-header">
+                    <img src="logo.jpg" alt="Escudo Compañía B-120" class="contact-minicard-logo">
+                    <h2>COMPAÑÍA DE BOMBEROS B-120</h2>
+                    <div class="contact-minicard-sub">San Juan de Miraflores</div>
+                </div>
+                <div class="contact-minicard-body">
+                    <div class="contact-minidata">
+                        <span class="contact-minidata-icon"></span>
+                        <span class="contact-minidata-label">Emergencias</span>
+                        <a href="tel:116" class="contact-minidata-value">116</a>
+                    </div>
+                    <div class="contact-minidata">
+                        <span class="contact-minidata-icon"></span>
+                        <span class="contact-minidata-label">Dirección</span>
+                        <a href="https://www.google.com/maps/place/Firehouse+B-120/@-12.1579407,-76.9804176,20z/data=!4m6!3m5!1s0x9105b84447c37471:0x9631321dccb2123b!8m2!3d-12.1578569!4d-76.9798275!16s%2Fg%2F1jkvn4fp7?entry=ttu&g_ep=EgoyMDI2MDQxNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" class="contact-minidata-value link-blue">Pedro Miota con Jr. Paita, SJM, Lima</a>
+                    </div>
+                    <div class="contact-minidata">
+                        <span class="contact-minidata-icon"></span>
+                        <span class="contact-minidata-label">Teléfono</span>
+                        <span class="contact-minidata-value">+51 1 2765961</span>
+                    </div>
+                    <div class="contact-minidata">
+                        <span class="contact-minidata-icon"></span>
+                        <span class="contact-minidata-label">Correo</span>
+                        <a href="mailto:b-120@bomberosperu.gob.pe" class="contact-minidata-value link-blue">b-120@bomberosperu.gob.pe</a>
+                    </div>
+                    <div class="contact-minidata">
+                        <span class="contact-minidata-icon"></span>
+                        <span class="contact-minidata-label">Atención</span>
+                        <span class="contact-minidata-value">24/7</span>
+                    </div>
+                </div>
+                <div class="contact-minicard-social">
+                    <span class="contact-minicard-social-label">Síguenos:</span>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/B120SanJuandeMiraflores/" target="_blank" rel="noopener" class="social-link social-facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 12c0-5.522-4.478-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988H7.898V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                            Facebook
+                        </a>
+                        <a href="https://www.instagram.com/bomberos_sjm_120/" target="_blank" rel="noopener" class="social-link social-instagram">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.97.24 2.43.403a4.9 4.9 0 0 1 1.772 1.153 4.9 4.9 0 0 1 1.153 1.772c.163.46.35 1.26.403 2.43.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.24 1.97-.403 2.43a4.9 4.9 0 0 1-1.153 1.772 4.9 4.9 0 0 1-1.772 1.153c-.46.163-1.26.35-2.43.403-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.97-.24-2.43-.403a4.9 4.9 0 0 1-1.772-1.153A4.9 4.9 0 0 1 1.566 19.28c-.163-.46-.35-1.26-.403-2.43C1.105 15.584 1.093 15.204 1.093 12s.012-3.584.07-4.85c.054-1.17.24-1.97.403-2.43A4.9 4.9 0 0 1 2.72 2.948a4.9 4.9 0 0 1 1.772-1.153c.46-.163 1.26-.35 2.43-.403C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.775.131 4.902.333 4.14.63A7.07 7.07 0 0 0 1.635 2.273 7.07 7.07 0 0 0 .63 4.14C.333 4.902.131 5.775.072 7.052.013 8.332 0 8.741 0 12c0 3.259.013 3.668.072 4.948.059 1.277.261 2.15.558 2.912a7.07 7.07 0 0 0 1.643 2.505 7.07 7.07 0 0 0 2.505 1.643c.762.297 1.635.499 2.912.558C8.332 23.987 8.741 24 12 24s3.668-.013 4.948-.072c1.277-.059 2.15-.261 2.912-.558a7.07 7.07 0 0 0 2.505-1.643 7.07 7.07 0 0 0 1.643-2.505c.297-.762.499-1.635.558-2.912C23.987 15.668 24 15.259 24 12s-.013-3.668-.072-4.948c-.059-1.277-.261-2.15-.558-2.912a7.07 7.07 0 0 0-1.643-2.505A7.07 7.07 0 0 0 19.86.63C19.098.333 18.225.131 16.948.072 15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                            Instagram
+                        </a>
+                        <a href="https://www.tiktok.com/@bomberossanjuan120" target="_blank" rel="noopener" class="social-link social-tiktok">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.74a4.85 4.85 0 0 1-1.01-.05z"/></svg>
+                            TikTok
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
     </main>

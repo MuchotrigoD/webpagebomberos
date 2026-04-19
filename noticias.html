@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Noticias - Compañía de Bomberos B-120">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Noticias - COMPAÑIA B-120</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Panel admin inline ── */
+        #admin-toolbar {
+            display: none;
+            background: #fff8f8;
+            border: 2px solid #ef9a9a;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+        }
+        #admin-toolbar .container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .admin-badge {
+            background: #d32f2f;
+            color: white;
+            font-size: 0.78em;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .admin-toolbar-btn {
+            background: white;
+            color: #d32f2f;
+            border: 2px solid #ef9a9a;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-block;
+        }
+        .admin-toolbar-btn:hover { background: #ffebee; border-color: #d32f2f; color: #d32f2f; }
+        .admin-toolbar-btn.danger { color: #888; border-color: #ddd; }
+        .admin-toolbar-btn.danger:hover { background: #f5f5f5; border-color: #aaa; color: #555; }
+        .admin-toolbar-spacer { flex: 1; }
+
+        /* ── Botones editar/eliminar en cards ── */
+        .news-card-admin-actions {
+            display: none;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .admin-mode .news-card-admin-actions { display: flex; }
+        .btn-card-edit {
+            background: #1565c0;
+            color: white;
+            border: none;
+            padding: 5px 13px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-card-edit:hover { background: #0d47a1; }
+        .btn-card-delete {
+            background: #c62828;
+            color: white;
+            border: none;
+            padding: 5px 13px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-card-delete:hover { background: #b71c1c; }
+
+        /* ── Modales ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 { color: #d32f2f; margin-bottom: 18px; font-size: 1.2em; }
+        .modal-form-group { margin-bottom: 13px; }
+        .modal-form-group label {
+            display: block;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .modal-form-group input,
+        .modal-form-group textarea {
+            width: 100%;
+            padding: 10px 13px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.94em;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .modal-form-group input:focus,
+        .modal-form-group textarea:focus { outline: none; border-color: #d32f2f; }
+        .modal-form-group textarea { min-height: 90px; resize: vertical; }
+        .modal-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+        .btn-modal-save {
+            flex: 1;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+        .btn-modal-cancel {
+            flex: 1;
+            background: #f5f5f5;
+            color: #555;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+        .modal-success {
+            color: #2e7d32;
+            font-size: 0.88em;
+            font-weight: 700;
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo-container">
+                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
+                <span class="company-name">COMPAÑIA B-120</span>
+            </div>
+            <nav class="nav">
+                <ul class="menu">
+                    <li><a href="index.html">INICIO</a></li>
+                    <li class="menu-dropdown">
+                        <a href="nosotros.html">NOSOTROS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="postula.html">Postula a la B-120</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="servicios.html">SERVICIOS</a></li>
+                    <li><a href="himnos.html">HIMNOS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="noticias.html" class="active">NOTICIAS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cursos.html">Cursos y Manuales</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="contacto.html">CONTACTO</a></li>
+                    <li id="nav-portal-li"><a href="efectivos.html" class="menu-portal" id="nav-portal-link">LOGIN</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="services">
+            <div class="container">
+                <!-- Panel admin inline -->
+                <div id="admin-toolbar" style="display:none;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span class="admin-badge" id="admin-badge-label" style="display:none;">ADMIN</span>
+                        <button class="admin-toolbar-btn" onclick="showAddModal()">+ Agregar noticia</button>
+                        <span class="admin-toolbar-spacer"></span>
+                        <button class="admin-toolbar-btn danger" onclick="adminLogout()">Cerrar sesión</button>
+                    </div>
+                </div>
+
+                <h2 style="text-align:center;">NOTICIAS</h2>
+                <p class="services-intro">Mantente informado sobre las últimas actividades, operaciones y eventos de la Compañía de Bomberos B-120. Aquí encontrarás nuestras novedades más recientes.</p>
+
+                <div class="news-list" id="news-list">
+                    <p style="text-align:center; color:#888;">Cargando noticias...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Compañía de Bomberos B-120. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- ── Modal: Agregar noticia ── -->
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-box" style="min-height:540px; max-width:480px; margin:0 auto; padding:36px 32px 36px 32px; box-sizing:border-box; background:#fff; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <h3 style="text-align:center; margin-bottom:22px;">+ Agregar nueva noticia</h3>
+            <div class="modal-form-row">
+                <div class="modal-form-group" style="width:44%; display:inline-block; vertical-align:top;">
+                    <label>Fecha</label>
+                    <input type="text" id="add-fecha" placeholder="Ej: 18 ABR 2026" style="width:100%; min-width:120px; border-radius:6px; border:1px solid #ccc; padding:12px 20px; font-size:1.12em; background:#fff;">
+                </div>
+                <div class="modal-form-group" style="width:54%; display:inline-block; margin-left:2%; vertical-align:top;">
+                    <label>Etiqueta</label>
+                    <input type="text" id="add-etiqueta" list="etiquetas-list" placeholder="Ej: Operación" style="width:100%; min-width:260px; border-radius:6px; border:1px solid #ccc; padding:12px 20px; font-size:1.12em; background:#fff;">
+                    <datalist id="etiquetas-list">
+                        <option value="Operación">
+                        <option value="Capacitación">
+                        <option value="Evento">
+                        <option value="Reconocimiento">
+                        <option value="Emergencia">
+                        <option value="Aniversario">
+                    </datalist>
+                </div>
+            </div>
+            <div class="modal-form-group">
+                <label>Título</label>
+                <input type="text" id="add-titulo" placeholder="Título de la noticia">
+            </div>
+            <div class="modal-form-group">
+                <label>Descripción</label>
+                <textarea id="add-desc" placeholder="Descripción de la noticia..."></textarea>
+            </div>
+            <div class="modal-form-group">
+                <label>Fotos <span style="color:#aaa; font-weight:400;">(opcional, puedes subir varias)</span></label>
+                <input type="file" id="add-media" accept="image/*" multiple style="padding:6px 0;" onchange="handleAddMediaChange(event)">
+                <div id="add-media-preview" style="display:none; margin-top:8px; display:flex; flex-wrap:wrap; gap:12px;"></div>
+            </div>
+            <div class="modal-form-group">
+                <label>Link de YouTube <span style="color:#aaa; font-weight:400;">(opcional, para videos largos)</span></label>
+                <input type="text" id="add-youtube" placeholder="Ej: https://www.youtube.com/watch?v=..." style="width:100%; border-radius:6px; border:1px solid #ccc; padding:10px 14px; font-size:0.97em;">
+            </div>
+            <div class="modal-success" id="add-success">Noticia agregada correctamente.</div>
+                        <div id="add-progress-bar" style="display:none; width:100%; background:#eee; border-radius:6px; margin:10px 0 0 0; height:18px; overflow:hidden;">
+                            <div id="add-progress-bar-inner" style="height:100%; width:0; background:#d32f2f; transition:width 0.2s;"></div>
+                        </div>
+            <div class="modal-btns">
+                <div style="display:flex; justify-content:center; gap:18px; margin-top:18px;">
+                    <button class="btn-modal-save" onclick="saveAddNews()" style="min-width:140px;">PUBLICAR NOTICIA</button>
+                    <button class="btn-modal-cancel" onclick="closeAddModal()" style="min-width:110px;">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Modal: Editar noticia ── -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="text-align:center;">Editar noticia</h3>
+            <div class="modal-form-row">
+                <div class="modal-form-group">
+                    <label>Fecha</label>
+                    <input type="text" id="edit-fecha">
+                </div>
+                <div class="modal-form-group">
+                    <label>Etiqueta</label>
+                    <input type="text" id="edit-etiqueta" list="etiquetas-list" placeholder="Ej: Operación" style="width:100%; min-width:260px; border-radius:6px; border:1px solid #ccc; padding:10px 16px; font-size:1.08em; background:#fff;">
+                </div>
+            </div>
+            <div class="modal-form-group">
+                <label>Título</label>
+                <input type="text" id="edit-titulo">
+            </div>
+            <div class="modal-form-group">
+                <label>Descripción</label>
+                <textarea id="edit-desc"></textarea>
+            </div>
+            <div class="modal-form-group">
+                <label>Adjuntar archivo <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
+                <input type="file" id="edit-foto" accept="image/*" style="padding:6px 0;">
+                <div id="edit-foto-preview" style="display:none; margin-top:8px;">
+                    <img id="edit-foto-img" src="" style="max-width:100%; max-height:180px; border-radius:8px; object-fit:cover;">
+                </div>
+            </div>
+            <div class="modal-btns">
+                <button class="btn-modal-save" onclick="saveEdit()">GUARDAR CAMBIOS</button>
+                <button class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+                        // Previsualización y eliminación de múltiples archivos (sin límite)
+                        let addMediaFiles = [];
+                        function handleAddMediaChange(e) {
+                            // Combinar archivos previos y nuevos, evitando duplicados por nombre y tamaño
+                            const newFiles = Array.from(e.target.files);
+                            addMediaFiles = addMediaFiles.concat(newFiles);
+                            // Eliminar duplicados (por nombre y tamaño)
+                            addMediaFiles = addMediaFiles.filter((file, idx, arr) =>
+                                arr.findIndex(f => f.name === file.name && f.size === file.size) === idx
+                            );
+                            const preview = document.getElementById('add-media-preview');
+                            preview.innerHTML = '';
+                            if (addMediaFiles.length > 0) {
+                                preview.style.display = 'flex';
+                                addMediaFiles.forEach((file, idx) => {
+                                    let el;
+                                    if (file.type.startsWith('image/')) {
+                                        el = document.createElement('img');
+                                        el.style.maxWidth = '120px';
+                                        el.style.maxHeight = '90px';
+                                        el.style.borderRadius = '8px';
+                                        el.style.objectFit = 'cover';
+                                        const reader = new FileReader();
+                                        reader.onload = ev => el.src = ev.target.result;
+                                        reader.readAsDataURL(file);
+                                    } else if (file.type.startsWith('video/')) {
+                                        el = document.createElement('video');
+                                        el.controls = true;
+                                        el.style.maxWidth = '120px';
+                                        el.style.maxHeight = '90px';
+                                        el.style.borderRadius = '8px';
+                                        const reader = new FileReader();
+                                        reader.onload = ev => el.src = ev.target.result;
+                                        reader.readAsDataURL(file);
+                                    }
+                                    const wrapper = document.createElement('div');
+                                    wrapper.style.position = 'relative';
+                                    wrapper.appendChild(el);
+                                    const btn = document.createElement('button');
+                                    btn.textContent = 'X';
+                                    btn.type = 'button';
+                                    btn.title = 'Eliminar';
+                                    btn.style.position = 'absolute';
+                                    btn.style.top = '2px';
+                                    btn.style.right = '2px';
+                                    btn.style.background = '#d32f2f';
+                                    btn.style.color = '#fff';
+                                    btn.style.border = 'none';
+                                    btn.style.borderRadius = '50%';
+                                    btn.style.width = '22px';
+                                    btn.style.height = '22px';
+                                    btn.style.cursor = 'pointer';
+                                    btn.onclick = function() {
+                                        addMediaFiles.splice(idx, 1);
+                                        const dt = new DataTransfer();
+                                        addMediaFiles.forEach(f => dt.items.add(f));
+                                        document.getElementById('add-media').files = dt.files;
+                                        handleAddMediaChange({target: {files: dt.files}});
+                                    };
+                                    wrapper.appendChild(btn);
+                                    preview.appendChild(wrapper);
+                                });
+                            } else {
+                                preview.style.display = 'none';
+                            }
+                            // Actualizar el input para reflejar todos los archivos seleccionados
+                            const dt = new DataTransfer();
+                            addMediaFiles.forEach(f => dt.items.add(f));
+                            document.getElementById('add-media').files = dt.files;
+                        }
+                function removeAddFoto() {
+                    document.getElementById('add-foto').value = '';
+                    document.getElementById('add-foto-img').src = '';
+                    document.getElementById('add-foto-preview').style.display = 'none';
+                }
+        function getYoutubeEmbedUrl(url) {
+            // Convierte cualquier URL de YouTube a embed
+            var match = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})/);
+            if (match) return 'https://www.youtube.com/embed/' + match[1];
+            return '';
+        }
+        var currentUserRol = null;
+        var editDocId = null;
+        var unsubscribeNews = null;
+
+        // ── Cargar noticias ───────────────────────────────────────────────────
+        function loadNews(adminMode) {
+            // Cancelar suscripción anterior si existe
+            if (unsubscribeNews) { unsubscribeNews(); unsubscribeNews = null; }
+
+            var query = db.collection('noticias').orderBy('timestamp', 'desc');
+
+            function render(snap) {
+                var lista = document.getElementById('news-list');
+                if (snap.empty) {
+                    lista.innerHTML = '<p style="text-align:center; color:#888;">No hay noticias publicadas todavía.</p>';
+                    return;
+                }
+                var html = '';
+                snap.forEach(function(doc) {
+                    var n = doc.data();
+                    let mediaHtml = '';
+                    if (n.mediaUrls && Array.isArray(n.mediaUrls) && n.mediaUrls.length > 0) {
+                        mediaHtml = '<div class="news-media-list" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px; justify-content:center;">';
+                        n.mediaUrls.forEach(function(url) {
+                            if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i) || url.includes('firebasestorage') || url.includes('cloudinary')) {
+                                mediaHtml += '<img src="' + url + '" style="max-width:220px; max-height:160px; border-radius:8px; object-fit:cover; box-shadow:0 2px 8px rgba(0,0,0,0.08);">';
+                            } else {
+                                mediaHtml += '<a href="' + url + '" target="_blank">Archivo</a>';
+                            }
+                        });
+                        mediaHtml += '</div>';
+                    }
+                    if (n.youtubeUrl) {
+                        mediaHtml += '<div style="margin-bottom:10px; display:flex; justify-content:center;"><iframe width="100%" style="max-width:480px; aspect-ratio:16/9; border-radius:8px; border:none;" src="' + n.youtubeUrl + '" allowfullscreen loading="lazy"></iframe></div>';
+                    }
+                    html +=
+                        '<article class="news-card">' +
+                            '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
+                                '<h3 style="margin:0; font-size:1.25em; font-weight:700; flex:1; text-align:center;">' + n.titulo + '</h3>' +
+                                '<div style="display:flex; align-items:center; gap:10px;">' +
+                                    '<span class="news-tag" style="background:#d32f2f; color:#fff; border-radius:6px; padding:4px 14px; font-size:0.98em; font-weight:600; margin-right:0;">' + n.etiqueta + '</span>' +
+                                    '<span class="news-date" style="color:#444; font-size:0.98em; font-weight:500; background:#f5f5f5; border-radius:6px; padding:4px 10px; margin-left:0;">' + (n.fecha || (n.dia + ' ' + n.mes)) + '</span>' +
+                                '</div>' +
+                            '</div>' +
+                            mediaHtml +
+                            '<div class="news-body" style="margin-top:8px;">' +
+                                '<p>' + n.descripcion + '</p>' +
+                                '<div class="news-card-admin-actions">' +
+                                    '<button class="btn-card-edit" onclick="openEdit(\'' + doc.id + '\')">Editar</button>' +
+                                    '<button class="btn-card-delete" onclick="deleteNews(\'' + doc.id + '\')">Eliminar</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</article>';
+                });
+                lista.innerHTML = html;
+            }
+
+            if (adminMode) {
+                unsubscribeNews = query.onSnapshot(render);
+            } else {
+                query.get().then(render).catch(function() {
+                    document.getElementById('news-list').innerHTML =
+                        '<p style="text-align:center; color:#888;">No se pudieron cargar las noticias.</p>';
+                });
+            }
+        }
+
+        // ── Auth state ────────────────────────────────────────────────────────
+        auth.onAuthStateChanged(async function(user) {
+            if (user) {
+                var snap = await db.collection('usuarios').doc(user.uid).get();
+                var rol  = snap.exists ? snap.data().rol : '';
+                if (rol === 'admin' || rol === 'super_admin') {
+                    currentUserRol = rol;
+                    // Activar modo admin visual
+                    document.body.classList.add('admin-mode');
+                    document.getElementById('admin-toolbar').style.display = 'block';
+                    document.getElementById('admin-badge-label').textContent = 'ADMIN';
+                    // Cambiar "LOGIN" por nombre en el nav
+                    var portalLink = document.getElementById('nav-portal-link');
+                    portalLink.textContent = snap.data().nombre || 'MI PORTAL';
+                    portalLink.href = 'efectivos.html';
+                    loadNews(true);
+                    return;
+                }
+            }
+            currentUserRol = null;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('admin-toolbar').style.display = 'none';
+            loadNews(false);
+        });
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        async function adminLogout() {
+            await auth.signOut();
+            window.location.reload();
+        }
+
+        // ── Modal agregar ─────────────────────────────────────────────────────
+        function showAddModal() {
+            ['add-fecha','add-titulo','add-desc','add-etiqueta','add-youtube'].forEach(function(id) {
+                document.getElementById(id).value = '';
+            });
+            if (document.getElementById('add-media')) {
+                document.getElementById('add-media').value = '';
+            }
+            if (document.getElementById('add-media-preview')) {
+                document.getElementById('add-media-preview').innerHTML = '';
+                document.getElementById('add-media-preview').style.display = 'none';
+            }
+            if (typeof addMediaFiles !== 'undefined') addMediaFiles = [];
+            document.getElementById('add-success').style.display = 'none';
+            document.getElementById('add-modal').classList.add('visible');
+        }
+
+        document.getElementById('add-foto').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('add-foto-img').src = ev.target.result;
+                    document.getElementById('add-foto-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.getElementById('add-foto-img').src = '';
+                document.getElementById('add-foto-preview').style.display = 'none';
+            }
+        });
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('visible');
+        }
+        async function saveAddNews() {
+                        var progressBar = document.getElementById('add-progress-bar');
+                        var progressBarInner = document.getElementById('add-progress-bar-inner');
+                        progressBar.style.display = 'none';
+                        progressBarInner.style.width = '0';
+            var fecha    = document.getElementById('add-fecha').value.trim();
+            var titulo   = document.getElementById('add-titulo').value.trim();
+            var desc     = document.getElementById('add-desc').value.trim();
+            var etiqueta = document.getElementById('add-etiqueta').value.trim();
+            var youtubeRaw = document.getElementById('add-youtube').value.trim();
+            var youtubeUrl = youtubeRaw ? getYoutubeEmbedUrl(youtubeRaw) : '';
+            var files = addMediaFiles;
+            if (!fecha || !titulo || !desc || !etiqueta) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+            var btnSave = document.querySelector('#add-modal .btn-modal-save');
+            btnSave.disabled = true;
+            btnSave.textContent = 'Guardando...';
+            var mediaUrls = [];
+            try {
+                if (files.length > 0) {
+                    progressBar.style.display = 'block';
+                    let completed = 0;
+                    mediaUrls = [];
+                    for (let i = 0; i < files.length; i++) {
+                        let file = files[i];
+                        let ext = file.name.split('.').pop();
+                        let storageRef = firebase.storage().ref('noticias/' + Date.now() + '_' + i + '.' + ext);
+                        await new Promise((resolve, reject) => {
+                            const uploadTask = storageRef.put(file);
+                            uploadTask.on('state_changed', function(snapshot) {
+                                // Progreso individual (opcional: sumar a barra global)
+                                let percent = ((completed + snapshot.bytesTransferred / snapshot.totalBytes) / files.length) * 100;
+                                progressBarInner.style.width = percent + '%';
+                            }, function(error) {
+                                reject(error);
+                            }, function() {
+                                uploadTask.snapshot.ref.getDownloadURL().then(function(url) {
+                                    mediaUrls.push(url);
+                                    completed++;
+                                    progressBarInner.style.width = ((completed / files.length) * 100) + '%';
+                                    resolve();
+                                }).catch(reject);
+                            });
+                        });
+                    }
+                    progressBarInner.style.width = '100%';
+                }
+                var data = {
+                    fecha: fecha, titulo: titulo,
+                    descripcion: desc, etiqueta: etiqueta,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                if (mediaUrls.length > 0) data.mediaUrls = mediaUrls;
+                if (youtubeUrl) data.youtubeUrl = youtubeUrl;
+                await db.collection('noticias').add(data);
+                progressBar.style.display = 'none';
+                btnSave.disabled = false;
+                btnSave.textContent = 'PUBLICAR NOTICIA';
+                document.getElementById('add-success').style.display = 'block';
+                setTimeout(closeAddModal, 1200);
+            } catch (err) {
+                progressBar.style.display = 'none';
+                btnSave.disabled = false;
+                btnSave.textContent = 'PUBLICAR NOTICIA';
+                let msg = 'Error al subir archivos o guardar la noticia. ';
+                if (err && err.code === 'storage/unauthorized') {
+                    msg += 'No tienes permisos para subir archivos.';
+                } else if (err && err.code === 'storage/canceled') {
+                    msg += 'Subida cancelada.';
+                } else if (err && err.message) {
+                    msg += err.message;
+                }
+                alert(msg);
+                console.error(err);
+            }
+        }
+
+        // ── Modal editar ──────────────────────────────────────────────────────
+        async function openEdit(docId) {
+            editDocId = docId;
+            var snap = await db.collection('noticias').doc(docId).get();
+            var n    = snap.data();
+            document.getElementById('edit-fecha').value    = n.fecha || (n.dia + ' ' + n.mes);
+            document.getElementById('edit-etiqueta').value = n.etiqueta || '';
+            document.getElementById('edit-titulo').value   = n.titulo;
+            document.getElementById('edit-desc').value     = n.descripcion;
+            document.getElementById('edit-modal').classList.add('visible');
+        }
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('visible');
+            editDocId = null;
+        }
+        async function saveEdit() {
+            if (!editDocId) return;
+            await db.collection('noticias').doc(editDocId).update({
+                fecha:       document.getElementById('edit-fecha').value.trim(),
+                etiqueta:    document.getElementById('edit-etiqueta').value.trim(),
+                titulo:      document.getElementById('edit-titulo').value.trim(),
+                descripcion: document.getElementById('edit-desc').value.trim()
+            });
+            closeEditModal();
+        }
+
+        // ── Eliminar noticia ──────────────────────────────────────────────────
+        async function deleteNews(docId) {
+            if (!confirm('¿Eliminar esta noticia? Esta acción no se puede deshacer.')) return;
+            await db.collection('noticias').doc(docId).delete();
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

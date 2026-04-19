@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Setup Admin - B-120</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .box {
+            background: white;
+            border-radius: 14px;
+            padding: 36px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+        h2 { color: #d32f2f; margin-bottom: 6px; }
+        p  { color: #666; font-size: 0.9em; margin-bottom: 22px; }
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        button:hover { background: #b71c1c; }
+        #msg {
+            margin-top: 16px;
+            font-weight: 700;
+            font-size: 0.95em;
+            display: none;
+        }
+        .warning {
+            background: #fff3e0;
+            border: 2px solid #ffcc80;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #e65100;
+            font-size: 0.82em;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="box">
+        <h2> Setup Administrador</h2>
+        <p>Inicia sesión con tu cuenta para asignarte el rol de administrador.</p>
+        <div class="warning">
+            Elimina esta página del servidor una vez que hayas configurado tu rol de admin.
+        </div>
+        <input type="email" id="email" placeholder="Tu correo electrónico">
+        <input type="password" id="pass" placeholder="Tu contraseña">
+        <div style="margin-bottom:12px; text-align:left;">
+            <label style="font-size:0.88em; font-weight:700; color:#555; display:block; margin-bottom:6px;">Rol a asignar:</label>
+            <select id="rol-elegido" style="width:100%; padding:11px 14px; border:2px solid #ddd; border-radius:8px; font-size:0.95em; box-sizing:border-box;">
+                <option value="admin">Administrador — gestión de noticias, postulaciones y grados</option>
+                <option value="super_admin">Super Admin — control total + eliminar efectivos</option>
+            </select>
+        </div>
+        <button onclick="hacerAdmin()">ASIGNARME EL ROL</button>
+        <div id="msg"></div>
+    </div>
+
+    <script>
+        async function hacerAdmin() {
+            var email = document.getElementById('email').value.trim();
+            var pass  = document.getElementById('pass').value;
+            var msg   = document.getElementById('msg');
+            msg.style.display = 'none';
+
+            if (!email || !pass) {
+                msg.style.color = '#d32f2f';
+                msg.textContent = 'Ingresa tu correo y contraseña.';
+                msg.style.display = 'block';
+                return;
+            }
+
+            try {
+                var cred = await auth.signInWithEmailAndPassword(email, pass);
+                var uid  = cred.user.uid;
+
+                // Obtener datos existentes del usuario si los hay
+                var snap = await db.collection('usuarios').doc(uid).get();
+                var datosExistentes = snap.exists ? snap.data() : {};
+
+                // Actualizar o crear el documento con el rol elegido
+                var rolElegido = document.getElementById('rol-elegido').value;
+                await db.collection('usuarios').doc(uid).set({
+                    ...datosExistentes,
+                    email: email,
+                    rol:   rolElegido
+                }, { merge: true });
+
+                await auth.signOut();
+
+                msg.style.color = '#2e7d32';
+                msg.textContent = 'Listo! Ahora eres ' + (rolElegido === 'super_admin' ? 'Super Admin' : 'Administrador') + '. Redirigiendo al panel...';
+                msg.style.display = 'block';
+
+                setTimeout(function() {
+                    window.location.href = 'admin.html';
+                }, 2500);
+
+            } catch(e) {
+                msg.style.color = '#d32f2f';
+                msg.textContent = 'Error: ' + (e.message || 'Inténtalo nuevamente.');
+                msg.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

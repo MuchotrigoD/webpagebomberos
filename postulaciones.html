@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Postulaciones - COMPAÑIA B-120</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #f0f0f0; }
+
+        /* ── Admin panel ── */
+        #admin-panel { padding-top: 75px; min-height: 100vh; background: #f5f5f5; }
+
+        .admin-header {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            padding: 14px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .admin-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            font-size: 1.1em;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        .rol-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            color: white;
+            font-size: 0.6em;
+            padding: 3px 9px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            vertical-align: middle;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.5);
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background 0.2s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.35); }
+
+        /* ── Pantalla de carga inicial ── */
+        #init-loading {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #init-loading p { color: white; font-size: 1em; letter-spacing: 1px; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Secciones ── */
+        .admin-content { max-width: 900px; margin: 0 auto; padding: 28px 16px; }
+
+        .admin-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .admin-section h2 {
+            font-size: 1.1em;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Postulaciones ── */
+        .postulacion-item {
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+        .postulacion-item:hover { border-color: #d32f2f; }
+        .postulacion-item .pi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .postulacion-item .pi-nombre {
+            font-weight: 800;
+            font-size: 1.05em;
+            color: #1a1a1a;
+        }
+        .postulacion-item .pi-estado {
+            font-size: 0.78em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .pi-estado.pendiente { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+        .pi-estado.aceptado  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .pi-estado.rechazado { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+        .pi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 6px 16px;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .pi-grid span b { color: #222; }
+        .pi-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .btn-aceptar  { background: #2e7d32; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82em; font-weight: 700; cursor: pointer; }
+        .btn-rechazar { background: #c62828; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82em; font-weight: 700; cursor: pointer; }
+        .btn-aceptar:hover, .btn-rechazar:hover { opacity: 0.8; }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+
+    <!-- ── Carga inicial ── -->
+    <div id="init-loading">
+        <div class="spinner"></div>
+        <p>Verificando acceso...</p>
+    </div>
+
+    <!-- ── Panel ── -->
+    <div id="admin-panel" style="display:none;">
+
+        <header class="admin-header">
+            <div class="container">
+                <h1>Postulaciones — Compañía B-120 <span id="rol-badge" class="rol-badge"></span></h1>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <a href="noticias.html" style="color:rgba(255,255,255,0.8); font-size:0.85em; text-decoration:none;">← Volver al sitio</a>
+                    <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <div class="admin-section">
+                <h2>Postulaciones recibidas</h2>
+                <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Revisa y gestiona las postulaciones enviadas a través del formulario web.</p>
+                <div id="postulaciones-admin-list">
+                    <p style="color:#aaa;">Cargando postulaciones...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sin acceso -->
+    <div id="no-access" style="display:none; min-height:100vh; background:linear-gradient(135deg,#d32f2f,#b71c1c); align-items:center; justify-content:center; flex-direction:column; gap:14px;">
+        <p style="color:white; font-size:1.1em;">Debes iniciar sesión como administrador.</p>
+        <a href="efectivos.html" style="background:rgba(255,255,255,0.2); color:white; padding:10px 24px; border-radius:8px; text-decoration:none; font-weight:700;">Ir al Portal</a>
+    </div>
+
+    <script>
+        var currentUserRol = null;
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        async function logout() {
+            await auth.signOut();
+            window.location.replace('noticias.html');
+        }
+
+        // ── Mostrar panel ─────────────────────────────────────────────────────
+        function showPanel() {
+            document.getElementById('admin-panel').style.display = 'block';
+            var badge = document.getElementById('rol-badge');
+            badge.textContent = currentUserRol === 'super_admin' ? 'SUPER ADMIN' : 'ADMIN';
+            badge.style.background = currentUserRol === 'super_admin' ? '#b71c1c' : '#555';
+            loadPostulaciones();
+        }
+
+        // ── Cargar postulaciones ──────────────────────────────────────────────
+        function loadPostulaciones() {
+            db.collection('postulaciones').orderBy('timestamp', 'desc').onSnapshot(function(snap) {
+                var container = document.getElementById('postulaciones-admin-list');
+                if (snap.empty) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay postulaciones recibidas.</p>';
+                    return;
+                }
+                var html = '';
+                snap.forEach(function(doc) {
+                    var p = doc.data();
+                    var estado = p.estado || 'pendiente';
+                    html += '<div class="postulacion-item">' +
+                        '<div class="pi-header">' +
+                            '<span class="pi-nombre">' + p.nombres + ' ' + p.apellidos + '</span>' +
+                            '<span class="pi-estado ' + estado + '">' + estado + '</span>' +
+                        '</div>' +
+                        '<div class="pi-grid">' +
+                            '<span><b>DNI:</b> ' + p.dni + '</span>' +
+                            '<span><b>Fecha nac.:</b> ' + p.fecha_nacimiento + '</span>' +
+                            '<span><b>Género:</b> ' + p.genero + '</span>' +
+                            '<span><b>Teléfono:</b> ' + p.telefono + '</span>' +
+                            '<span><b>Email:</b> ' + p.email + '</span>' +
+                            '<span><b>Dirección:</b> ' + p.direccion + ', ' + p.distrito + '</span>' +
+                            '<span><b>Estatura:</b> ' + p.estatura + ' cm</span>' +
+                            '<span><b>Peso:</b> ' + p.peso + ' kg</span>' +
+                            '<span><b>Instrucción:</b> ' + p.grado_instruccion + '</span>' +
+                            '<span><b>Centro estudios:</b> ' + (p.centro_estudios || '-') + '</span>' +
+                            '<span><b>Oficio:</b> ' + (p.trabajo_oficio || '-') + '</span>' +
+                            '<span><b>Empresa:</b> ' + (p.empresa || '-') + '</span>' +
+                            (p.certificado_url ? '<span><b>Cert. Laboral:</b> <a href="' + p.certificado_url + '" target="_blank" style="color:#d32f2f;">Ver archivo</a></span>' : '<span><b>Cert. Laboral:</b> No adjuntado</span>') +
+                            (p.curriculum_url  ? '<span><b>Curriculum:</b> <a href="' + p.curriculum_url  + '" target="_blank" style="color:#d32f2f;">Ver archivo</a></span>'   : '<span><b>Curriculum:</b> No adjuntado</span>') +
+                        '</div>' +
+                        (estado === 'pendiente' ? '<div class="pi-actions">' +
+                            '<button class="btn-aceptar"  onclick="cambiarEstado(\'' + doc.id + '\', \'aceptado\')">Aceptar</button>' +
+                            '<button class="btn-rechazar" onclick="cambiarEstado(\'' + doc.id + '\', \'rechazado\')">Rechazar</button>' +
+                        '</div>' : '') +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // ── Cambiar estado postulación ────────────────────────────────────────
+        async function cambiarEstado(docId, nuevoEstado) {
+            if (!confirm('¿Marcar esta postulación como ' + nuevoEstado + '?')) return;
+            await db.collection('postulaciones').doc(docId).update({ estado: nuevoEstado });
+        }
+
+        // ── Auth observer ─────────────────────────────────────────────────────
+        function hideLoading() {
+            document.getElementById('init-loading').style.display = 'none';
+        }
+
+        auth.onAuthStateChanged(async function(user) {
+            if (!user) {
+                hideLoading();
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('no-access').style.display   = 'flex';
+                currentUserRol = null;
+                return;
+            }
+            if (!currentUserRol) {
+                var snap = await db.collection('usuarios').doc(user.uid).get();
+                var rol  = snap.exists ? snap.data().rol : '';
+                if (rol !== 'admin' && rol !== 'super_admin') {
+                    await auth.signOut();
+                    hideLoading();
+                    document.getElementById('no-access').style.display = 'flex';
+                    return;
+                }
+                currentUserRol = rol;
+                hideLoading();
+                showPanel();
+            }
+        });
+
+        // Evitar que bfcache restaure el panel visible al presionar "atrás"
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted) {
+                document.getElementById('init-loading').style.display = 'flex';
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('no-access').style.display   = 'none';
+                currentUserRol = null;
+            }
+        });
+    </script>
+
+</body>
+</html>

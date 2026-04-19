@@ -7,21 +7,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Nuestros Efectivos - COMPAÑIA B-120</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Panel admin inline ── */
+        #admin-toolbar {
+            display: none;
+            background: #fff8f8;
+            border: 2px solid #ef9a9a;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+        }
+        #admin-toolbar .container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .admin-badge {
+            background: #d32f2f;
+            color: white;
+            font-size: 0.78em;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .admin-toolbar-btn {
+            background: white;
+            color: #d32f2f;
+            border: 2px solid #ef9a9a;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82em;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-block;
+        }
+        .admin-toolbar-btn:hover { background: #ffebee; border-color: #d32f2f; color: #d32f2f; }
+        .admin-toolbar-spacer { flex: 1; }
+
+        /* ── Botón eliminar en cards (solo en modo admin) ── */
+        .personnel-admin-actions {
+            display: none;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        .admin-mode .personnel-admin-actions { display: flex; }
+        .btn-card-edit {
+            background: #1565c0;
+            color: white;
+            border: none;
+            padding: 5px 13px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-card-edit:hover { background: #0d47a1; }
+        .btn-card-delete {
+            background: #c62828;
+            color: white;
+            border: none;
+            padding: 5px 13px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-card-delete:hover { background: #b71c1c; }
+
+        /* ── Placeholder foto ── */
+        .personnel-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #d32f2f22, #d32f2f44);
+            font-size: 2.5em;
+            color: #d32f2f;
+            border-radius: inherit;
+        }
+
+        /* ── Modales ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            width: 100%;
+            max-width: 480px;
+            margin: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 { color: #d32f2f; margin-bottom: 18px; font-size: 1.2em; }
+        .mfg { margin-bottom: 13px; }
+        .mfg label {
+            display: block;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .mfg input, .mfg select {
+            width: 100%;
+            padding: 10px 13px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.94em;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .mfg input:focus, .mfg select:focus { outline: none; border-color: #d32f2f; }
+        .mfg .hint { font-size: 0.75em; color: #aaa; margin-top: 4px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+        .btn-modal-save {
+            flex: 1;
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+        .btn-modal-cancel {
+            flex: 1;
+            background: #f5f5f5;
+            color: #555;
+            border: none;
+            padding: 11px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+        }
+        .modal-success {
+            color: #2e7d32;
+            font-size: 0.88em;
+            font-weight: 700;
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+        #personnel-loading { text-align: center; color: #888; padding: 40px 0; }
+    </style>
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="logo-container">
-                <img class="logo" src="logo.jpg" alt="Escudo Compañía B-120">
+                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
                 <span class="company-name">COMPAÑIA B-120</span>
             </div>
             <nav class="nav">
                 <ul class="menu">
                     <li><a href="index.html">INICIO</a></li>
-                    <li><a href="nosotros.html" class="active">NOSOTROS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="nosotros.html" class="active">NOSOTROS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="postula.html">Postula a la B-120</a></li>
+                        </ul>
+                    </li>
                     <li><a href="servicios.html">SERVICIOS</a></li>
                     <li><a href="himnos.html">HIMNOS</a></li>
+                    <li class="menu-dropdown">
+                        <a href="noticias.html">NOTICIAS</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="cursos.html">Cursos y Manuales</a></li>
+                        </ul>
+                    </li>
                     <li><a href="contacto.html">CONTACTO</a></li>
+                    <li id="nav-portal-li"><a href="efectivos.html" class="menu-portal" id="nav-portal-link">LOGIN</a></li>
                 </ul>
             </nav>
         </div>
@@ -30,57 +203,22 @@
     <main>
         <section class="about">
             <div class="container">
-                <h2>NUESTROS EFECTIVOS</h2>
+                <!-- Panel admin inline  CURSO DE FORMACIÓN BÁSICA DE BOMBEROS-->
+                <div id="admin-toolbar" style="display:none;">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span class="admin-badge" id="admin-badge-label" style="display:none;">ADMIN</span>
+                        <button class="admin-toolbar-btn" onclick="showAddModal()">+ Agregar efectivo</button>
+                        <a class="admin-toolbar-btn" href="admin.html">Gestión de efectivos</a>
+                        <a class="admin-toolbar-btn" href="postulaciones.html">Postulaciones</a>
+                        <span class="admin-toolbar-spacer"></span>
+                        <button class="admin-toolbar-btn" onclick="adminLogout()">Cerrar sesión</button>
+                    </div>
+                </div>
+
+                <h2>CONOCE A NUESTRO EQUIPO</h2>
                 <p>Conoce al valiente equipo de la Compañía de Bomberos B-120, profesionales dedicados a proteger y servir a nuestra comunidad.</p>
-                <div class="personnel-list">
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/jefe.jpg" alt="Jefe de Compañía" onerror="this.style.display='none'">
-                        </div>
-                        <h3>Primer Jefe de Compañía</h3>
-                        <p>Brigadier CBP Renzo Cesar Augusto Chavez Fayffer</p>
-                        <p>30.11</p>
-                    </div>
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/subjefe.jpg" alt="Subjefe" onerror="this.style.display='none'">
-                        </div>
-                        <h3>Segundo Jefe de Compañia</h3>
-                        <p>Capitan CBP Giovanni Gregoria Salazar</p>
-                        <p>30.12</p>
-                    </div>
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/cabo.jpg" alt="Cabo" onerror="this.style.display='none'">
-                        </div>
-                        <h3>Teniente Brigadier</h3>
-                        <p></p>
-                        <p></p>
-                    </div>
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/bombero1.jpg" alt="Bombero Voluntario" onerror="this.style.display='none'">
-                        </div>
-                        <h3>seccionario</h3>
-                        <p></p>
-                        <p></p>
-                    </div>
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/conductor.jpg" alt="Conductor" onerror="this.style.display='none'">
-                        </div>
-                        <h3>Piloto Rentado</h3>
-                        <p></p>
-                        <p></p>
-                    </div>
-                    <div class="personnel">
-                        <div class="personnel-photo">
-                            <img src="images/medico.jpg" alt="Médico" onerror="this.style.display='none'">
-                        </div>
-                        <h3>Médico</h3>
-                        <p></p>
-                        <p></p>
-                    </div>
+                <div class="personnel-list" id="personnel-list">
+                    <p id="personnel-loading">Cargando equipo...</p>
                 </div>
             </div>
         </section>
@@ -92,6 +230,272 @@
         </div>
     </footer>
 
+    <!-- ── Modal: Agregar efectivo ── -->
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-box" style="max-height:90vh; overflow-y:auto;">
+            <h3>+ Agregar efectivo al panel</h3>
+            <div class="mfg">
+                <label>Grado</label>
+                <select id="add-cargo">
+                    <option value="">-- Seleccionar grado --</option>
+                    <option value="Brigadier">Brigadier</option>
+                    <option value="Ten. Brigadier">Ten. Brigadier</option>
+                    <option value="Capitán">Capitán</option>
+                    <option value="Teniente">Teniente</option>
+                    <option value="Sub Teniente">Sub Teniente</option>
+                    <option value="Seccionario">Seccionario</option>
+                    <option value="Aspirante">Aspirante</option>
+                    <option value="Postulante">Postulante</option>
+                </select>
+            </div>
+            <div class="mfg">
+                <label>Nombre completo</label>
+                <input type="text" id="add-nombre" placeholder="Ej: Juan Pérez García">
+            </div>
+            <div class="mfg">
+                <label>Descripción <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
+                <textarea id="add-descripcion" placeholder="Breve descripción del efectivo..." style="width:100%; padding:10px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:0.94em; font-family:inherit; min-height:65px; resize:vertical; box-sizing:border-box;"></textarea>
+            </div>
+            <div class="mfg">
+                <label>Foto <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
+                <input type="file" id="add-foto-file" accept="image/*" style="padding:6px 0;" onchange="previewAddFoto(event)">
+                <div id="add-foto-preview" style="display:none; margin-top:8px; text-align:center;">
+                    <img id="add-foto-img" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #d32f2f;">
+                </div>
+            </div>
+            <div class="mfg">
+                <label>Fecha de ingreso a la compañía</label>
+                <input type="date" id="add-fecha-ingreso" onkeydown="if(event.key==='Delete'||event.key==='Backspace') this.value=''" style="width:100%; padding:10px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:0.94em; font-family:inherit; box-sizing:border-box;">
+            </div>
+            <div class="modal-success" id="add-success">Efectivo agregado correctamente.</div>
+            <div class="modal-btns">
+                <button class="btn-modal-save" id="add-btn-save" onclick="saveAdd()">AGREGAR</button>
+                <button class="btn-modal-cancel" onclick="closeAddModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Modal: Editar efectivo ── -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Editar efectivo</h3>
+            <div class="mfg">
+                <label>URL de foto (opcional)</label>
+                <input type="text" id="edit-foto">
+            </div>
+            <div class="mfg">
+                <label>Grado</label>
+                <input type="text" id="edit-cargo">
+            </div>
+            <div class="mfg">
+                <label>Nombre completo</label>
+                <input type="text" id="edit-nombre">
+            </div>
+            <div class="mfg">
+                <label>Fecha de incorporación</label>
+                <input type="date" id="edit-fecha-ingreso">
+            </div>
+            <div class="mfg">
+                <label>Descripción <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
+                <textarea id="edit-descripcion" placeholder="Breve descripción del efectivo..." style="width:100%; padding:10px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:0.94em; font-family:inherit; min-height:65px; resize:vertical; box-sizing:border-box;"></textarea>
+            </div>
+            <div class="modal-btns">
+                <button class="btn-modal-save" onclick="saveEdit()">GUARDAR CAMBIOS</button>
+                <button class="btn-modal-cancel" onclick="closeEditModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        var currentUserRol = null;
+        var editDocId = null;
+        var unsubPersonnel = null;
+
+        // ── Renderizar cards ──────────────────────────────────────────────────
+        function renderPersonnel(snap) {
+            var lista = document.getElementById('personnel-list');
+            if (snap.empty) {
+                lista.innerHTML = '<p style="text-align:center;color:#888;">Aún no hay efectivos en el panel.</p>';
+                return;
+            }
+            var html = '';
+            snap.forEach(function(doc) {
+                var p = doc.data();
+                var cargoEscaped = (p.cargo || '').replace(/'/g, "\\'");
+                var foto = p.fotoUrl
+                    ? '<img src="' + p.fotoUrl + '" alt="' + (p.cargo || '') + '" onerror="this.parentElement.innerHTML=\'<div class=\\"personnel-photo-placeholder\\"></div>\'>'
+                    : '<div class="personnel-photo-placeholder"></div>';
+                html +=
+                    '<div class="personnel">' +
+                        '<div class="personnel-photo">' + foto + '</div>' +
+                        '<h3>' + (p.cargo || '') + '</h3>' +
+                        (p.nombre ? '<p>' + p.nombre + '</p>' : '') +
+                        (p.fechaIngreso ? '<p><span style="color:#888;font-size:0.93em;">Fecha de incorporación:</span> ' + p.fechaIngreso + '</p>' : '') +
+                        (p.descripcion ? '<p>' + p.descripcion + '</p>' : '') +
+                        '<div class="personnel-admin-actions">' +
+                            '<button class="btn-card-edit" onclick="openEdit(\'' + doc.id + '\')">Editar</button>' +
+                            '<button class="btn-card-delete" onclick="deletePersonnel(\'' + doc.id + '\', \'' + cargoEscaped + '\')">Quitar</button>' +
+                        '</div>' +
+                    '</div>';
+            });
+            lista.innerHTML = html;
+        }
+
+        // ── Cargar personal ───────────────────────────────────────────────────
+        function loadPersonnel(adminMode) {
+            if (unsubPersonnel) { unsubPersonnel(); unsubPersonnel = null; }
+            var query = db.collection('vitrina');
+            if (adminMode) {
+                unsubPersonnel = query.onSnapshot(function(snap) {
+                    var sorted = snap.docs.sort(function(a, b) {
+                        var oa = a.data().orden ?? 9999;
+                        var ob = b.data().orden ?? 9999;
+                        return oa - ob;
+                    });
+                    renderPersonnel({ empty: sorted.length === 0, forEach: function(cb) { sorted.forEach(cb); } });
+                });
+            } else {
+                query.get().then(function(snap) {
+                    var sorted = snap.docs.sort(function(a, b) {
+                        var oa = a.data().orden ?? 9999;
+                        var ob = b.data().orden ?? 9999;
+                        return oa - ob;
+                    });
+                    renderPersonnel({ empty: sorted.length === 0, forEach: function(cb) { sorted.forEach(cb); } });
+                }).catch(function() {
+                    document.getElementById('personnel-list').innerHTML =
+                        '<p style="text-align:center;color:#888;">No se pudo cargar el equipo.</p>';
+                });
+            }
+        }
+
+        // ── Auth state ────────────────────────────────────────────────────────
+        auth.onAuthStateChanged(async function(user) {
+            if (user) {
+                var snap = await db.collection('usuarios').doc(user.uid).get();
+                var rol  = snap.exists ? snap.data().rol : '';
+                if (rol === 'admin' || rol === 'super_admin') {
+                    currentUserRol = rol;
+                    document.body.classList.add('admin-mode');
+                    document.getElementById('admin-toolbar').style.display = 'block';
+                    document.getElementById('admin-badge-label').textContent = 'ADMIN';
+                    var portalLink = document.getElementById('nav-portal-link');
+                    if (portalLink) {
+                        portalLink.textContent = snap.data().nombre || 'MI PORTAL';
+                        portalLink.href = 'efectivos.html';
+                    }
+                    loadPersonnel(true);
+                    return;
+                }
+            }
+            currentUserRol = null;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('admin-toolbar').style.display = 'none';
+            loadPersonnel(false);
+        });
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        async function adminLogout() {
+            await auth.signOut();
+            window.location.reload();
+        }
+
+        function previewAddFoto(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('add-foto-img').src = ev.target.result;
+                    document.getElementById('add-foto-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ── Modal agregar ─────────────────────────────────────────────────────
+        function showAddModal() {
+            ['add-cargo','add-nombre','add-descripcion','add-fecha-ingreso'].forEach(function(id){
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('add-foto-file').value = '';
+            document.getElementById('add-foto-preview').style.display = 'none';
+            document.getElementById('add-success').style.display = 'none';
+            document.getElementById('add-modal').classList.add('visible');
+        }
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('visible');
+        }
+        async function saveAdd() {
+            var cargo        = document.getElementById('add-cargo').value.trim();
+            var nombre       = document.getElementById('add-nombre').value.trim();
+            var descripcion  = document.getElementById('add-descripcion').value.trim();
+            var fechaIngreso = document.getElementById('add-fecha-ingreso').value;
+            var fotoFile     = document.getElementById('add-foto-file').files[0] || null;
+            if (!cargo) { alert('El grado es obligatorio.'); return; }
+            var btn = document.getElementById('add-btn-save');
+            btn.disabled = true; btn.textContent = 'Guardando...';
+            var fotoUrl = '';
+            if (fotoFile) {
+                try {
+                    var storageRef = firebase.storage().ref('vitrina/' + Date.now() + '.' + fotoFile.name.split('.').pop());
+                    await storageRef.put(fotoFile);
+                    fotoUrl = await storageRef.getDownloadURL();
+                } catch(e) { fotoUrl = ''; }
+            }
+            await db.collection('vitrina').add({
+                cargo: cargo, nombre: nombre,
+                descripcion: descripcion, fechaIngreso: fechaIngreso,
+                fotoUrl: fotoUrl,
+                orden: Date.now(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            btn.disabled = false; btn.textContent = 'AGREGAR';
+            document.getElementById('add-success').style.display = 'block';
+            setTimeout(closeAddModal, 1200);
+        }
+
+        // ── Modal editar ──────────────────────────────────────────────────────
+        async function openEdit(docId) {
+            editDocId = docId;
+            var snap = await db.collection('vitrina').doc(docId).get();
+            var p    = snap.data();
+            document.getElementById('edit-cargo').value  = p.cargo  || '';
+            document.getElementById('edit-nombre').value = p.nombre || '';
+            document.getElementById('edit-foto').value   = p.fotoUrl || '';
+            document.getElementById('edit-fecha-ingreso').value = p.fechaIngreso || '';
+            document.getElementById('edit-descripcion').value = p.descripcion || '';
+            document.getElementById('edit-modal').classList.add('visible');
+        }
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('visible');
+            editDocId = null;
+        }
+        async function saveEdit() {
+            if (!editDocId) return;
+            var cargo = document.getElementById('edit-cargo').value.trim();
+            if (!cargo) { alert('El cargo es obligatorio.'); return; }
+            await db.collection('vitrina').doc(editDocId).update({
+                cargo:  cargo,
+                nombre: document.getElementById('edit-nombre').value.trim(),
+                fotoUrl: document.getElementById('edit-foto').value.trim(),
+                fechaIngreso: document.getElementById('edit-fecha-ingreso').value,
+                descripcion: document.getElementById('edit-descripcion').value.trim()
+            });
+            closeEditModal();
+        }
+
+        // ── Eliminar ──────────────────────────────────────────────────────────
+        async function deletePersonnel(docId, cargo) {
+            if (!confirm('¿Quitar a "' + cargo + '" del panel? Esta acción no se puede deshacer.')) return;
+            await db.collection('vitrina').doc(docId).delete();
+        }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
