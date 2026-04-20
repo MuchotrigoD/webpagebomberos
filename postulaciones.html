@@ -152,11 +152,6 @@
         .btn-rechazar { background: #c62828; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.82em; font-weight: 700; cursor: pointer; }
         .btn-aceptar:hover, .btn-rechazar:hover { opacity: 0.8; }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -198,13 +193,119 @@
     </div>
 
     <script>
-        var currentUserRol = null;
+        var API = 'http://127.0.0.1:8000/api';
+
+        function getToken() { return localStorage.getItem('django_token'); }
+        function isAdmin()  { return localStorage.getItem('django_is_admin') === 'true'; }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            var token = getToken();
+            if (!token || !isAdmin()) {
+                document.getElementById('init-loading').style.display = 'none';
+                document.getElementById('no-access').style.display = 'flex';
+                return;
+            }
+            document.getElementById('init-loading').style.display = 'none';
+            showPanel();
+        });
+
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted) {
+                document.getElementById('init-loading').style.display = 'flex';
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('no-access').style.display   = 'none';
+                if (!getToken() || !isAdmin()) {
+                    document.getElementById('init-loading').style.display = 'none';
+                    document.getElementById('no-access').style.display    = 'flex';
+                } else {
+                    document.getElementById('init-loading').style.display = 'none';
+                    showPanel();
+                }
+            }
+        });
 
         // ── Logout ────────────────────────────────────────────────────────────
-        async function logout() {
-            await auth.signOut();
+        function logout() {
+            localStorage.removeItem('django_token');
+            localStorage.removeItem('django_is_admin');
             window.location.replace('noticias.html');
         }
+
+        // ── Mostrar panel ─────────────────────────────────────────────────────
+        function showPanel() {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('rol-badge').textContent  = 'ADMIN';
+            document.getElementById('rol-badge').style.background = '#555';
+            loadPostulaciones();
+        }
+
+        // ── Cargar postulaciones ──────────────────────────────────────────────
+        async function loadPostulaciones() {
+            var container = document.getElementById('postulaciones-admin-list');
+            container.innerHTML = '<p style="color:#aaa;">Cargando postulaciones...</p>';
+            try {
+                var res  = await fetch(API + '/postulaciones/', {
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                var data = await res.json();
+                if (!data.length) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay postulaciones recibidas.</p>';
+                    return;
+                }
+                var html = '';
+                data.forEach(function(p) {
+                    var estado = p.estado || 'pendiente';
+                    html += '<div class="postulacion-item">' +
+                        '<div class="pi-header">' +
+                            '<span class="pi-nombre">' + p.nombre + ' ' + p.apellido + '</span>' +
+                            '<span class="pi-estado ' + estado + '">' + estado + '</span>' +
+                        '</div>' +
+                        '<div class="pi-grid">' +
+                            '<span><b>DNI:</b> '           + (p.dni              || '—') + '</span>' +
+                            '<span><b>Fecha nac.:</b> '    + (p.fecha_nacimiento || '—') + '</span>' +
+                            '<span><b>Género:</b> '        + (p.genero           || '—') + '</span>' +
+                            '<span><b>Teléfono:</b> '      + (p.telefono         || '—') + '</span>' +
+                            '<span><b>Email:</b> '         + (p.email            || '—') + '</span>' +
+                            '<span><b>Dirección:</b> '     + (p.direccion        || '—') + (p.distrito ? ', ' + p.distrito : '') + '</span>' +
+                            '<span><b>Estatura:</b> '      + (p.estatura ? p.estatura + ' cm' : '—') + '</span>' +
+                            '<span><b>Peso:</b> '          + (p.peso     ? p.peso     + ' kg' : '—') + '</span>' +
+                            '<span><b>Instrucción:</b> '   + (p.grado_instruccion || '—') + '</span>' +
+                            (p.mensaje ? '<span style="grid-column:1/-1;"><b>Mensaje:</b> ' + p.mensaje + '</span>' : '') +
+                        '</div>' +
+                        (estado === 'pendiente' ? '<div class="pi-actions">' +
+                            '<button class="btn-aceptar"  onclick="cambiarEstado(' + p.id + ', \'aceptado\')">Aceptar</button>' +
+                            '<button class="btn-rechazar" onclick="cambiarEstado(' + p.id + ', \'rechazado\')">Rechazar</button>' +
+                        '</div>' : '') +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p style="color:#e53935;">Error al cargar postulaciones. ¿Está corriendo el servidor?</p>';
+            }
+        }
+
+        // ── Cambiar estado postulación ────────────────────────────────────────
+        async function cambiarEstado(id, nuevoEstado) {
+            if (!confirm('¿Marcar esta postulación como ' + nuevoEstado + '?')) return;
+            try {
+                await fetch(API + '/postulaciones/' + id + '/', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Token ' + getToken()
+                    },
+                    body: JSON.stringify({estado: nuevoEstado})
+                });
+                loadPostulaciones();
+            } catch(e) {
+                alert('Error al actualizar el estado.');
+            }
+        }
+    </script>
+
+</body>
+</html>
 
         // ── Mostrar panel ─────────────────────────────────────────────────────
         function showPanel() {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
@@ -172,10 +172,12 @@
 <body>
     <header class="header">
         <div class="container">
-            <div class="logo-container">
-                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
-                <span class="company-name">COMPAÑIA B-120</span>
-            </div>
+                        <div class="logo-container">
+                                <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                                    <img class="logo" src="logo.jpg" alt="Escudo Compañía B-120">
+                                    <span class="company-name">COMPAÑIA B-120</span>
+                                </a>
+                        </div>
             <nav class="nav">
                 <ul class="menu">
                     <li><a href="index.html">INICIO</a></li>
@@ -213,6 +215,9 @@
                         <span class="admin-toolbar-spacer"></span>
                         <button class="admin-toolbar-btn" onclick="adminLogout()">Cerrar sesión</button>
                     </div>
+                </div>
+                <div id="admin-login-btn" style="text-align:right; margin-bottom:10px; display:none;">
+                    <button class="admin-toolbar-btn" onclick="adminLoginDjango()" style="font-size:0.78em;">Admin Login</button>
                 </div>
 
                 <h2>CONOCE A NUESTRO EQUIPO</h2>
@@ -257,11 +262,9 @@
                 <textarea id="add-descripcion" placeholder="Breve descripción del efectivo..." style="width:100%; padding:10px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:0.94em; font-family:inherit; min-height:65px; resize:vertical; box-sizing:border-box;"></textarea>
             </div>
             <div class="mfg">
-                <label>Foto <span style="color:#aaa; font-weight:400;">(opcional)</span></label>
-                <input type="file" id="add-foto-file" accept="image/*" style="padding:6px 0;" onchange="previewAddFoto(event)">
-                <div id="add-foto-preview" style="display:none; margin-top:8px; text-align:center;">
-                    <img id="add-foto-img" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #d32f2f;">
-                </div>
+                <label>Foto <span style="color:#aaa; font-weight:400;">(URL opcional)</span></label>
+                <input type="url" id="add-foto-url" placeholder="https://..." style="width:100%; padding:10px 13px; border:2px solid #e0e0e0; border-radius:8px; font-size:0.94em; font-family:inherit; box-sizing:border-box;">
+                <div id="add-foto-preview" style="display:none;"></div>
             </div>
             <div class="mfg">
                 <label>Fecha de ingreso a la compañía</label>
@@ -306,41 +309,39 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    <script src="firebase-config.js"></script>
+
     <script>
-        var currentUserRol = null;
-        var editDocId = null;
-        var unsubPersonnel = null;
+        var API = 'http://127.0.0.1:8000/api';
+        function getToken() { return localStorage.getItem('django_token'); }
+        function isAdmin()  { return !!getToken(); }
+
+        function authHeaders() {
+            return {'Content-Type':'application/json','Authorization':'Token '+getToken()};
+        }
 
         // ── Renderizar cards ──────────────────────────────────────────────────
-        function renderPersonnel(snap) {
+        function renderPersonnel(data) {
             var lista = document.getElementById('personnel-list');
-            if (snap.empty) {
+            if (!data.length) {
                 lista.innerHTML = '<p style="text-align:center;color:#888;">Aún no hay efectivos en el panel.</p>';
                 return;
             }
             var html = '';
-            snap.forEach(function(doc) {
-                var p = doc.data();
+            data.forEach(function(p) {
                 var cargoEscaped = (p.cargo || '').replace(/'/g, "\\'");
-                var foto = p.fotoUrl
-                    ? '<img src="' + p.fotoUrl + '" alt="' + (p.cargo || '') + '" onerror="this.parentElement.innerHTML=\'<div class=\\"personnel-photo-placeholder\\"></div>\'>'
+                var foto = p.foto_url
+                    ? '<img src="' + p.foto_url + '" alt="' + (p.cargo || '') + '" onerror="this.parentElement.innerHTML=\'<div class=\\"personnel-photo-placeholder\\"></div>\'">'
                     : '<div class="personnel-photo-placeholder"></div>';
                 html +=
                     '<div class="personnel">' +
                         '<div class="personnel-photo">' + foto + '</div>' +
                         '<h3>' + (p.cargo || '') + '</h3>' +
                         (p.nombre ? '<p>' + p.nombre + '</p>' : '') +
-                        (p.fechaIngreso ? '<p><span style="color:#888;font-size:0.93em;">Fecha de incorporación:</span> ' + p.fechaIngreso + '</p>' : '') +
+                        (p.fecha_ingreso ? '<p><span style="color:#888;font-size:0.93em;">Fecha de incorporación:</span> ' + p.fecha_ingreso + '</p>' : '') +
                         (p.descripcion ? '<p>' + p.descripcion + '</p>' : '') +
                         '<div class="personnel-admin-actions">' +
-                            '<button class="btn-card-edit" onclick="openEdit(\'' + doc.id + '\')">Editar</button>' +
-                            '<button class="btn-card-delete" onclick="deletePersonnel(\'' + doc.id + '\', \'' + cargoEscaped + '\')">Quitar</button>' +
+                            '<button class="btn-card-edit" onclick="openEdit(' + p.id + ')">Editar</button>' +
+                            '<button class="btn-card-delete" onclick="deletePersonnel(' + p.id + ', \'' + cargoEscaped + '\')">Quitar</button>' +
                         '</div>' +
                     '</div>';
             });
@@ -348,82 +349,68 @@
         }
 
         // ── Cargar personal ───────────────────────────────────────────────────
-        function loadPersonnel(adminMode) {
-            if (unsubPersonnel) { unsubPersonnel(); unsubPersonnel = null; }
-            var query = db.collection('vitrina');
-            if (adminMode) {
-                unsubPersonnel = query.onSnapshot(function(snap) {
-                    var sorted = snap.docs.sort(function(a, b) {
-                        var oa = a.data().orden ?? 9999;
-                        var ob = b.data().orden ?? 9999;
-                        return oa - ob;
-                    });
-                    renderPersonnel({ empty: sorted.length === 0, forEach: function(cb) { sorted.forEach(cb); } });
-                });
+        async function loadPersonnel() {
+            try {
+                var res  = await fetch(API + '/vitrina/');
+                var data = await res.json();
+                renderPersonnel(data);
+            } catch(e) {
+                document.getElementById('personnel-list').innerHTML =
+                    '<p style="text-align:center;color:#888;">No se pudo cargar el equipo.</p>';
+            }
+        }
+
+        // ── Auth state (Django token) ──────────────────────────────────────────
+        function initAdminUI() {
+            var toolbar   = document.getElementById('admin-toolbar');
+            var loginBtn  = document.getElementById('admin-login-btn');
+            if (isAdmin()) {
+                document.body.classList.add('admin-mode');
+                toolbar.style.display = 'block';
+                if (loginBtn) loginBtn.style.display = 'none';
             } else {
-                query.get().then(function(snap) {
-                    var sorted = snap.docs.sort(function(a, b) {
-                        var oa = a.data().orden ?? 9999;
-                        var ob = b.data().orden ?? 9999;
-                        return oa - ob;
-                    });
-                    renderPersonnel({ empty: sorted.length === 0, forEach: function(cb) { sorted.forEach(cb); } });
-                }).catch(function() {
-                    document.getElementById('personnel-list').innerHTML =
-                        '<p style="text-align:center;color:#888;">No se pudo cargar el equipo.</p>';
+                document.body.classList.remove('admin-mode');
+                toolbar.style.display = 'none';
+                if (loginBtn) loginBtn.style.display = 'block';
+            }
+        }
+
+        async function adminLoginDjango() {
+            var user = prompt('Usuario:');
+            if (!user) return;
+            var pass = prompt('Contraseña:');
+            if (!pass) return;
+            try {
+                var res  = await fetch(API + '/login/', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({username: user, password: pass})
                 });
-            }
-        }
-
-        // ── Auth state ────────────────────────────────────────────────────────
-        auth.onAuthStateChanged(async function(user) {
-            if (user) {
-                var snap = await db.collection('usuarios').doc(user.uid).get();
-                var rol  = snap.exists ? snap.data().rol : '';
-                if (rol === 'admin' || rol === 'super_admin') {
-                    currentUserRol = rol;
-                    document.body.classList.add('admin-mode');
-                    document.getElementById('admin-toolbar').style.display = 'block';
-                    document.getElementById('admin-badge-label').textContent = 'ADMIN';
-                    var portalLink = document.getElementById('nav-portal-link');
-                    if (portalLink) {
-                        portalLink.textContent = snap.data().nombre || 'MI PORTAL';
-                        portalLink.href = 'efectivos.html';
-                    }
-                    loadPersonnel(true);
-                    return;
+                var data = await res.json();
+                if (data.token) {
+                    localStorage.setItem('django_token', data.token);
+                    localStorage.setItem('django_is_admin', data.is_admin);
+                    initAdminUI();
+                    loadPersonnel();
+                } else {
+                    alert('Credenciales incorrectas.');
                 }
-            }
-            currentUserRol = null;
-            document.body.classList.remove('admin-mode');
-            document.getElementById('admin-toolbar').style.display = 'none';
-            loadPersonnel(false);
-        });
-
-        // ── Logout ────────────────────────────────────────────────────────────
-        async function adminLogout() {
-            await auth.signOut();
-            window.location.reload();
+            } catch(e) { alert('Error al conectar con el servidor.'); }
         }
 
-        function previewAddFoto(e) {
-            var file = e.target.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(ev) {
-                    document.getElementById('add-foto-img').src = ev.target.result;
-                    document.getElementById('add-foto-preview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
+        function adminLogout() {
+            localStorage.removeItem('django_token');
+            localStorage.removeItem('django_is_admin');
+            initAdminUI();
+            loadPersonnel();
         }
 
         // ── Modal agregar ─────────────────────────────────────────────────────
         function showAddModal() {
-            ['add-cargo','add-nombre','add-descripcion','add-fecha-ingreso'].forEach(function(id){
-                document.getElementById(id).value = '';
+            ['add-cargo','add-nombre','add-descripcion','add-fecha-ingreso','add-foto-url'].forEach(function(id){
+                var el = document.getElementById(id);
+                if (el) el.value = '';
             });
-            document.getElementById('add-foto-file').value = '';
             document.getElementById('add-foto-preview').style.display = 'none';
             document.getElementById('add-success').style.display = 'none';
             document.getElementById('add-modal').classList.add('visible');
@@ -436,65 +423,78 @@
             var nombre       = document.getElementById('add-nombre').value.trim();
             var descripcion  = document.getElementById('add-descripcion').value.trim();
             var fechaIngreso = document.getElementById('add-fecha-ingreso').value;
-            var fotoFile     = document.getElementById('add-foto-file').files[0] || null;
-            if (!cargo) { alert('El grado es obligatorio.'); return; }
+            var fotoUrl      = (document.getElementById('add-foto-url') || {}).value || '';
+            if (!cargo) { alert('El grado/cargo es obligatorio.'); return; }
             var btn = document.getElementById('add-btn-save');
             btn.disabled = true; btn.textContent = 'Guardando...';
-            var fotoUrl = '';
-            if (fotoFile) {
-                try {
-                    var storageRef = firebase.storage().ref('vitrina/' + Date.now() + '.' + fotoFile.name.split('.').pop());
-                    await storageRef.put(fotoFile);
-                    fotoUrl = await storageRef.getDownloadURL();
-                } catch(e) { fotoUrl = ''; }
-            }
-            await db.collection('vitrina').add({
-                cargo: cargo, nombre: nombre,
-                descripcion: descripcion, fechaIngreso: fechaIngreso,
-                fotoUrl: fotoUrl,
-                orden: Date.now(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            try {
+                var res = await fetch(API + '/vitrina/', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({cargo, nombre, descripcion, fecha_ingreso: fechaIngreso, foto_url: fotoUrl, orden: Date.now()})
+                });
+                if (res.ok) {
+                    document.getElementById('add-success').style.display = 'block';
+                    setTimeout(function() { closeAddModal(); loadPersonnel(); }, 1200);
+                } else { alert('Error al guardar.'); }
+            } catch(e) { alert('Error de conexión.'); }
             btn.disabled = false; btn.textContent = 'AGREGAR';
-            document.getElementById('add-success').style.display = 'block';
-            setTimeout(closeAddModal, 1200);
         }
 
         // ── Modal editar ──────────────────────────────────────────────────────
-        async function openEdit(docId) {
-            editDocId = docId;
-            var snap = await db.collection('vitrina').doc(docId).get();
-            var p    = snap.data();
-            document.getElementById('edit-cargo').value  = p.cargo  || '';
-            document.getElementById('edit-nombre').value = p.nombre || '';
-            document.getElementById('edit-foto').value   = p.fotoUrl || '';
-            document.getElementById('edit-fecha-ingreso').value = p.fechaIngreso || '';
-            document.getElementById('edit-descripcion').value = p.descripcion || '';
-            document.getElementById('edit-modal').classList.add('visible');
+        async function openEdit(id) {
+            try {
+                var res = await fetch(API + '/vitrina/' + id + '/');
+                var p   = await res.json();
+                document.getElementById('edit-cargo').value  = p.cargo  || '';
+                document.getElementById('edit-nombre').value = p.nombre || '';
+                document.getElementById('edit-foto').value   = p.foto_url || '';
+                document.getElementById('edit-fecha-ingreso').value = p.fecha_ingreso || '';
+                document.getElementById('edit-descripcion').value  = p.descripcion  || '';
+                document.getElementById('edit-modal').classList.add('visible');
+                document.getElementById('edit-modal').dataset.editId = id;
+            } catch(e) { alert('Error al cargar datos.'); }
         }
         function closeEditModal() {
             document.getElementById('edit-modal').classList.remove('visible');
-            editDocId = null;
         }
         async function saveEdit() {
-            if (!editDocId) return;
+            var id   = document.getElementById('edit-modal').dataset.editId;
             var cargo = document.getElementById('edit-cargo').value.trim();
             if (!cargo) { alert('El cargo es obligatorio.'); return; }
-            await db.collection('vitrina').doc(editDocId).update({
-                cargo:  cargo,
-                nombre: document.getElementById('edit-nombre').value.trim(),
-                fotoUrl: document.getElementById('edit-foto').value.trim(),
-                fechaIngreso: document.getElementById('edit-fecha-ingreso').value,
-                descripcion: document.getElementById('edit-descripcion').value.trim()
-            });
-            closeEditModal();
+            try {
+                var res = await fetch(API + '/vitrina/' + id + '/', {
+                    method: 'PATCH',
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        cargo:  cargo,
+                        nombre: document.getElementById('edit-nombre').value.trim(),
+                        foto_url: document.getElementById('edit-foto').value.trim(),
+                        fecha_ingreso: document.getElementById('edit-fecha-ingreso').value,
+                        descripcion: document.getElementById('edit-descripcion').value.trim()
+                    })
+                });
+                if (res.ok) { closeEditModal(); loadPersonnel(); }
+                else { alert('Error al guardar.'); }
+            } catch(e) { alert('Error de conexión.'); }
         }
 
         // ── Eliminar ──────────────────────────────────────────────────────────
-        async function deletePersonnel(docId, cargo) {
-            if (!confirm('¿Quitar a "' + cargo + '" del panel? Esta acción no se puede deshacer.')) return;
-            await db.collection('vitrina').doc(docId).delete();
+        async function deletePersonnel(id, cargo) {
+            if (!confirm('¿Quitar a "' + cargo + '" del panel?')) return;
+            try {
+                await fetch(API + '/vitrina/' + id + '/', {
+                    method: 'DELETE', headers: authHeaders()
+                });
+                loadPersonnel();
+            } catch(e) { alert('Error de conexión.'); }
         }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            initAdminUI();
+            loadPersonnel();
+        });
     </script>
     <script src="script.js"></script>
 </body>

@@ -353,21 +353,18 @@
             .portal-card { border-radius: 15px; }
         }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    <script src="firebase-config.js"></script>
+
 </head>
 <body>
 
     <header class="header">
         <div class="container">
-            <div class="logo-container">
-                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
-                <span class="company-name">COMPAÑIA B-120</span>
-            </div>
+                        <div class="logo-container">
+                                <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                                    <img class="logo" src="logo.jpg" alt="Escudo Compañía B-120">
+                                    <span class="company-name">COMPAÑIA B-120</span>
+                                </a>
+                        </div>
             <nav class="nav">
                 <ul class="menu">
                     <li><a href="index.html">INICIO</a></li>
@@ -591,6 +588,32 @@
     </div>
 
     <script>
+        var API = 'http://127.0.0.1:8000/api';
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+        function getToken() { return localStorage.getItem('django_token'); }
+        function isLoggedIn() { return !!getToken(); }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn()) {
+                showViews('loading');
+                loadDashboard();
+            } else {
+                showViews('auth');
+            }
+        });
+
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted && !isLoggedIn()) { showViews('auth'); switchTab('login'); }
+        });
+
+        function showViews(which) {
+            document.getElementById('auth-view').style.display     = which === 'auth'     ? 'block' : 'none';
+            document.getElementById('loading-screen').style.display = which === 'loading'  ? 'block' : 'none';
+            document.getElementById('dashboard').style.display     = which === 'dashboard' ? 'block' : 'none';
+        }
+
         // ── Checklist de grados ──────────────────────────────────────────────
         function selectGrado(el, valor) {
             document.querySelectorAll('.grado-option').forEach(function(o) { o.classList.remove('selected'); });
@@ -620,7 +643,233 @@
 
         function hideError(id) { document.getElementById(id).style.display = 'none'; }
 
-        function firebaseErrorMsg(code) {
+        // ── Tabs ──────────────────────────────────────────────────────────────
+
+        function switchTab(tab) {
+            ['login','register'].forEach(function(t) {
+                document.getElementById('tab-' + t).classList.remove('active');
+                document.querySelectorAll('.tab-btn')[t === 'login' ? 0 : 1].classList.remove('active');
+            });
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.querySelectorAll('.tab-btn')[tab === 'login' ? 0 : 1].classList.add('active');
+            hideError('login-error');
+            hideError('register-error');
+            document.getElementById('register-success').style.display = 'none';
+        }
+
+        // ── Login ─────────────────────────────────────────────────────────────
+
+        async function doLogin() {
+            hideError('login-error');
+            var email = document.getElementById('login-email').value.trim();
+            var pass  = document.getElementById('login-pass').value;
+            if (!email || !pass) {
+                showError('login-error', 'Ingresa tu correo y contraseña.');
+                return;
+            }
+            try {
+                var res  = await fetch(API + '/login/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: email, password: pass})
+                });
+                var data = await res.json();
+                if (data.token) {
+                    localStorage.setItem('django_token', data.token);
+                    localStorage.setItem('django_is_admin', data.is_admin);
+                    showViews('loading');
+                    loadDashboard();
+                } else {
+                    showError('login-error', 'Correo o contraseña incorrectos.');
+                    document.getElementById('login-pass').value = '';
+                }
+            } catch(e) {
+                showError('login-error', 'Error de conexión. Verifica tu red.');
+            }
+        }
+
+        // ── Registro ──────────────────────────────────────────────────────────
+
+        async function doRegister() {
+            hideError('register-error');
+            document.getElementById('register-success').style.display = 'none';
+
+            var nombre       = document.getElementById('reg-nombre').value.trim();
+            var apellido     = document.getElementById('reg-apellido').value.trim();
+            var rut          = document.getElementById('reg-rut').value.trim();
+            var email        = document.getElementById('reg-email').value.trim();
+            var grado        = document.getElementById('reg-grado').value;
+            var descripcion  = document.getElementById('reg-descripcion').value.trim();
+            var fechaIngreso = document.getElementById('reg-fecha-ingreso').value;
+            var pass         = document.getElementById('reg-pass').value;
+            var pass2        = document.getElementById('reg-pass2').value;
+
+            if (!nombre || !apellido || !rut || !email || !grado || !fechaIngreso) {
+                showError('register-error', 'Por favor completa todos los campos obligatorios.');
+                return;
+            }
+            if (pass.length < 10) {
+                showError('register-error', 'La contraseña debe tener al menos 10 caracteres.');
+                return;
+            }
+            if (pass !== pass2) {
+                showError('register-error', 'Las contraseñas no coinciden.');
+                return;
+            }
+
+            try {
+                var res = await fetch(API + '/registro/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        nombre: nombre, apellido: apellido, email: email,
+                        password: pass, dni: rut, grado: grado,
+                        descripcion: descripcion, fecha_ingreso: fechaIngreso
+                    })
+                });
+                var data = await res.json();
+                if (data.ok) {
+                    ['reg-nombre','reg-apellido','reg-rut','reg-email','reg-descripcion',
+                     'reg-fecha-ingreso','reg-pass','reg-pass2'].forEach(function(id) {
+                        document.getElementById(id).value = '';
+                    });
+                    document.getElementById('reg-grado').value = '';
+                    document.querySelectorAll('.grado-option').forEach(function(o){ o.classList.remove('selected'); });
+                    document.getElementById('reg-foto-preview').style.display = 'none';
+                    document.getElementById('register-success').style.display = 'block';
+                    setTimeout(function(){ switchTab('login'); }, 1800);
+                } else {
+                    showError('register-error', data.error || 'Error al registrarse.');
+                }
+            } catch(e) {
+                showError('register-error', 'Error de conexión.');
+            }
+        }
+
+        function previewRegFoto(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('reg-foto-img').src = ev.target.result;
+                    document.getElementById('reg-foto-preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ── Dashboard ─────────────────────────────────────────────────────────
+
+        async function loadDashboard() {
+            try {
+                var res = await fetch(API + '/me/', {
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                if (res.status === 401 || res.status === 403) { doLogout(); return; }
+                var u = await res.json();
+
+                var nombre   = u.nombre || u.username || '';
+                var apellido = u.apellido || '';
+                document.getElementById('dash-name').textContent  = (nombre + ' ' + apellido).trim();
+                document.getElementById('dash-rank').textContent  = u.grado || '—';
+                document.getElementById('dash-rut').textContent   = u.dni || '—';
+                document.getElementById('dash-email').textContent = u.email || '—';
+                document.getElementById('dash-rol').textContent   = u.is_admin ? 'Administrador' : 'Efectivo';
+
+                var dashAvatar = document.getElementById('dash-avatar');
+                var dashFoto   = document.getElementById('dash-foto');
+                if (u.foto_url) {
+                    dashAvatar.style.display = 'none';
+                    dashFoto.src = u.foto_url;
+                    dashFoto.style.display = 'block';
+                } else {
+                    var initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+                    dashAvatar.textContent = initials;
+                    dashAvatar.style.display = 'flex';
+                    dashFoto.style.display = 'none';
+                }
+
+                var descEl = document.getElementById('dash-descripcion');
+                if (u.descripcion) {
+                    descEl.textContent = u.descripcion;
+                    descEl.style.display = 'block';
+                } else {
+                    descEl.style.display = 'none';
+                }
+
+                if (u.fecha_ingreso) {
+                    document.getElementById('dash-anio').textContent = u.fecha_ingreso.split('-').reverse().join('/');
+                    var ingreso = new Date(u.fecha_ingreso);
+                    var years   = Math.floor((new Date() - ingreso) / (1000 * 60 * 60 * 24 * 365.25));
+                    document.getElementById('dash-service').textContent = years > 0
+                        ? years + (years === 1 ? ' año' : ' años') : 'Menos de 1 año';
+                } else {
+                    document.getElementById('dash-anio').textContent    = '—';
+                    document.getElementById('dash-service').textContent = '—';
+                }
+
+                document.getElementById('change-pass-section').style.display = 'none';
+                showViews('dashboard');
+            } catch(e) {
+                doLogout();
+            }
+        }
+
+        // ── Logout ────────────────────────────────────────────────────────────
+
+        function doLogout() {
+            localStorage.removeItem('django_token');
+            localStorage.removeItem('django_is_admin');
+            showViews('auth');
+            switchTab('login');
+        }
+
+        // ── Cambiar contraseña ────────────────────────────────────────────────
+
+        function toggleChangePass() {
+            var sec = document.getElementById('change-pass-section');
+            sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+            hideError('chpass-error');
+            document.getElementById('chpass-success').style.display = 'none';
+        }
+
+        async function changePass() {
+            hideError('chpass-error');
+            document.getElementById('chpass-success').style.display = 'none';
+            var p1 = document.getElementById('chpass-new').value;
+            var p2 = document.getElementById('chpass-new2').value;
+            if (p1.length < 6) {
+                showError('chpass-error', 'La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+            if (p1 !== p2) {
+                showError('chpass-error', 'Las contraseñas no coinciden.');
+                return;
+            }
+            try {
+                var res = await fetch(API + '/change-password/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'Authorization': 'Token ' + getToken()},
+                    body: JSON.stringify({new_password: p1})
+                });
+                var data = await res.json();
+                if (data.token) {
+                    localStorage.setItem('django_token', data.token);
+                    document.getElementById('chpass-new').value  = '';
+                    document.getElementById('chpass-new2').value = '';
+                    document.getElementById('chpass-success').style.display = 'block';
+                    setTimeout(function(){ document.getElementById('change-pass-section').style.display = 'none'; }, 2000);
+                } else {
+                    showError('chpass-error', data.error || 'Error al actualizar contraseña.');
+                }
+            } catch(e) {
+                showError('chpass-error', 'Error de conexión.');
+            }
+        }
+    </script>
+
+</body>
+</html>
             var msgs = {
                 'auth/email-already-in-use':   'Ya existe una cuenta con ese correo.',
                 'auth/invalid-email':           'Correo electrónico inválido.',

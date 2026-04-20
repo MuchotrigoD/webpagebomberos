@@ -76,6 +76,7 @@
             padding: 28px 24px;
             border-left: 4px solid #d32f2f;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
         }
         .curso-card:hover {
             transform: translateY(-3px);
@@ -119,8 +120,10 @@
         /* ── Admin: botones en cards ── */
         .curso-card-admin-actions {
             display: none;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 6px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
         .admin-mode .curso-card-admin-actions { display: flex; }
         .btn-card-edit, .btn-card-delete {
@@ -167,6 +170,33 @@
             box-sizing: border-box; transition: border-color 0.2s;
         }
         .mfg input:focus, .mfg textarea:focus, .mfg select:focus { border-color: #d32f2f; outline: none; }
+
+        /* ── Combobox personalizado ── */
+        .combo-wrap { position: relative; }
+        .combo-wrap input { width: 100%; }
+        .combo-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 2px solid #d32f2f;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .combo-dropdown.open { display: block; }
+        .combo-option {
+            padding: 9px 13px;
+            cursor: pointer;
+            font-size: 0.94em;
+            color: #333;
+        }
+        .combo-option:hover, .combo-option.active { background: #ffebee; color: #d32f2f; }
         .modal-success { color: #2e7d32; font-weight: 700; font-size: 0.9em; margin-top: 6px; display: none; }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
         .btn-modal-save {
@@ -187,10 +217,12 @@
 <body>
     <header class="header">
         <div class="container">
-            <div class="logo-container">
-                <a href="logo-view.html" target="_blank"><img class="logo" src="logo.jpg" alt="Escudo Compañía B-120"></a>
-                <span class="company-name">COMPAÑIA B-120</span>
-            </div>
+                        <div class="logo-container">
+                                <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                                    <img class="logo" src="logo.jpg" alt="Escudo Compañía B-120">
+                                    <span class="company-name">COMPAÑIA B-120</span>
+                                </a>
+                        </div>
             <nav class="nav">
                 <ul class="menu">
                     <li><a href="index.html">INICIO</a></li>
@@ -226,17 +258,43 @@
                         <button class="admin-toolbar-btn danger" onclick="adminLogout()">Cerrar sesión</button>
                     </div>
                 </div>
+                <!-- Botón login admin (visible solo si no está logueado) -->
+                <div id="admin-login-btn" style="text-align:right; margin-bottom:10px;">
+                    <script>
+                        if (!localStorage.getItem('django_token')) {
+                            document.write('<button class="admin-toolbar-btn" onclick="adminLoginDjango()" style="font-size:0.78em;">Admin Login</button>');
+                        }
+                    </script>
+                </div>
 
-                <h2>CURSOS Y MANUALES</h2>
-                <p class="cursos-subtitle">Descarga aquí los cursos, manuales y materiales útiles para la Compañía de Bomberos B-120. Si tienes un archivo para compartir, indícalo al administrador.</p>
+                                <div style="text-align:center;">
+                                    <h2 class="titulo-recuadro">CURSOS Y MANUALES</h2>
+                                </div>
+                                <div style="text-align:center;">
+                                    <p class="cursos-subtitle descripcion-recuadro">Descarga aquí los cursos, manuales y materiales útiles para la Compañía de Bomberos B-120. Si tienes un archivo para compartir, indícalo al administrador.</p>
+                                </div>
 
                 <!-- Cards fijas -->
                 <div class="cursos-grid" style="margin-bottom:24px;">
                     <div class="curso-card">
                         <div class="curso-card-icon"></div>
                         <h3>Curso de Formación Básica de Bomberos</h3>
-                        <p style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">Curso</p>
+                        <p class="card-tipo" style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">Curso</p>
                         <a class="curso-card-link" href="https://drive.google.com/file/d/12YdLRe3ExygRB-HpdmC3q52yX4hvAkoz/view?usp=drive_link" target="_blank" rel="noopener">Ver / Descargar</a>
+                        <div class="curso-card-admin-actions">
+                            <button class="btn-card-edit" onclick="editarFija(this, 'Curso de Formación Básica de Bomberos', 'https://drive.google.com/file/d/12YdLRe3ExygRB-HpdmC3q52yX4hvAkoz/view?usp=drive_link')">Editar</button>
+                            <button class="btn-card-delete" onclick="eliminarFija(this, 'Curso de Formación Básica de Bomberos')">Quitar</button>
+                        </div>
+                    </div>
+                    <div class="curso-card">
+                        <div class="curso-card-icon"></div>
+                        <h3>Compañía de Bomberos SJM B-120</h3>
+                        <p class="card-tipo" style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">Documento</p>
+                        <a class="curso-card-link" href="https://www.scribd.com/presentation/387113234/Compania-de-Bomberos-SJM-B-120-1" target="_blank" rel="noopener">Ver / Descargar</a>
+                        <div class="curso-card-admin-actions">
+                            <button class="btn-card-edit" onclick="editarFija(this, 'Compañía de Bomberos SJM B-120', 'https://www.scribd.com/presentation/387113234/Compania-de-Bomberos-SJM-B-120-1')">Editar</button>
+                            <button class="btn-card-delete" onclick="eliminarFija(this, 'Compañía de Bomberos SJM B-120')">Quitar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -253,11 +311,16 @@
             <h3>+ Agregar curso / manual</h3>
             <div class="mfg">
                 <label>Tipo</label>
-                <select id="add-tipo">
-                    <option value="Curso">Curso</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Documento">Documento</option>
-                </select>
+                <div class="combo-wrap">
+                    <input type="text" id="add-tipo" placeholder="Ej: Curso, Manual..." autocomplete="off" onInput="comboFilter('add-tipo-list', this.value)" onFocus="comboOpen('add-tipo-list')" onBlur="comboClose('add-tipo-list')">
+                    <div id="add-tipo-list" class="combo-dropdown">
+                        <div class="combo-option" onMouseDown="comboSelect('add-tipo', 'Curso', 'add-tipo-list')">Curso</div>
+                        <div class="combo-option" onMouseDown="comboSelect('add-tipo', 'Manual', 'add-tipo-list')">Manual</div>
+                        <div class="combo-option" onMouseDown="comboSelect('add-tipo', 'Documento', 'add-tipo-list')">Documento</div>
+                        <div class="combo-option" onMouseDown="comboSelect('add-tipo', 'Reglamento', 'add-tipo-list')">Reglamento</div>
+                        <div class="combo-option" onMouseDown="comboSelect('add-tipo', 'Protocolo', 'add-tipo-list')">Protocolo</div>
+                    </div>
+                </div>
             </div>
             <div class="mfg">
                 <label>Título</label>
@@ -285,11 +348,16 @@
             <h3>Editar curso / manual</h3>
             <div class="mfg">
                 <label>Tipo</label>
-                <select id="edit-tipo">
-                    <option value="Curso">Curso</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Documento">Documento</option>
-                </select>
+                <div class="combo-wrap">
+                    <input type="text" id="edit-tipo" placeholder="Ej: Curso, Manual..." autocomplete="off" onInput="comboFilter('edit-tipo-list', this.value)" onFocus="comboOpen('edit-tipo-list')" onBlur="comboClose('edit-tipo-list')">
+                    <div id="edit-tipo-list" class="combo-dropdown">
+                        <div class="combo-option" onMouseDown="comboSelect('edit-tipo', 'Curso', 'edit-tipo-list')">Curso</div>
+                        <div class="combo-option" onMouseDown="comboSelect('edit-tipo', 'Manual', 'edit-tipo-list')">Manual</div>
+                        <div class="combo-option" onMouseDown="comboSelect('edit-tipo', 'Documento', 'edit-tipo-list')">Documento</div>
+                        <div class="combo-option" onMouseDown="comboSelect('edit-tipo', 'Reglamento', 'edit-tipo-list')">Reglamento</div>
+                        <div class="combo-option" onMouseDown="comboSelect('edit-tipo', 'Protocolo', 'edit-tipo-list')">Protocolo</div>
+                    </div>
+                </div>
             </div>
             <div class="mfg">
                 <label>Título</label>
@@ -310,28 +378,50 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <!-- Backend Django API -->
     <script>
+        // ── Combobox helpers ──────────────────────────────────────────────────
+        function comboOpen(listId) {
+            document.getElementById(listId).classList.add('open');
+        }
+        function comboClose(listId) {
+            setTimeout(function() { document.getElementById(listId).classList.remove('open'); }, 150);
+        }
+        function comboSelect(inputId, value, listId) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(listId).classList.remove('open');
+        }
+        function comboFilter(listId, val) {
+            var list = document.getElementById(listId);
+            list.classList.add('open');
+            var opts = list.querySelectorAll('.combo-option');
+            opts.forEach(function(opt) {
+                opt.style.display = opt.textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none';
+            });
+        }
+        var API = 'http://127.0.0.1:8000/api';
         var currentUserRol = null;
-        var editDocId = null;
-        var unsubCursos = null;
+        var editCursoId = null;
 
         var TIPO_ICON = { 'Curso': '', 'Manual': '', 'Documento': '' };
 
+        function getToken() { return localStorage.getItem('django_token'); }
+        function isAdmin()  { return localStorage.getItem('django_is_admin') === 'true'; }
+
+        function authHeaders() {
+            var t = getToken();
+            return t ? { 'Authorization': 'Token ' + t, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+        }
+
         // ── Renderizar cards ──────────────────────────────────────────────────
-        function renderCursos(snap) {
+        function renderCursos(cursos) {
             var lista = document.getElementById('cursos-list');
-            if (snap.empty) {
+            if (!cursos.length) {
                 lista.innerHTML = '<p class="cursos-empty">No hay cursos o manuales publicados todavía.</p>';
                 return;
             }
             var html = '';
-            snap.forEach(function(doc) {
-                var c = doc.data();
+            cursos.forEach(function(c) {
                 var icon = TIPO_ICON[c.tipo] || '';
                 var linkBtn = c.url
                     ? '<a class="curso-card-link" href="' + c.url + '" target="_blank" rel="noopener">Ver / Descargar</a>'
@@ -340,12 +430,12 @@
                     '<div class="curso-card">' +
                         '<div class="curso-card-icon">' + icon + '</div>' +
                         '<h3>' + (c.titulo || '') + '</h3>' +
-                        (c.tipo ? '<p style="color:#d32f2f; font-size:0.82em; font-weight:700; margin-bottom:6px;">' + c.tipo + '</p>' : '') +
+                        (c.tipo ? '<p style="color:#d32f2f;font-size:0.82em;font-weight:700;margin-bottom:6px;">' + c.tipo + '</p>' : '') +
                         (c.descripcion ? '<p>' + c.descripcion + '</p>' : '') +
                         linkBtn +
                         '<div class="curso-card-admin-actions">' +
-                            '<button class="btn-card-edit" onclick="openEdit(\'' + doc.id + '\')">Editar</button>' +
-                            '<button class="btn-card-delete" onclick="deleteCurso(\'' + doc.id + '\', \'' + (c.titulo || '').replace(/'/g, "\\'") + '\')">Quitar</button>' +
+                            '<button class="btn-card-edit" onclick="openEdit(' + c.id + ')">Editar</button>' +
+                            '<button class="btn-card-delete" onclick="deleteCurso(' + c.id + ', \'' + (c.titulo || '').replace(/'/g, "\\'") + '\')">Quitar</button>' +
                         '</div>' +
                     '</div>';
             });
@@ -353,49 +443,52 @@
         }
 
         // ── Cargar ────────────────────────────────────────────────────────────
-        function loadCursos(adminMode) {
-            if (unsubCursos) { unsubCursos(); unsubCursos = null; }
-            var query = db.collection('cursos').orderBy('timestamp', 'desc');
-            if (adminMode) {
-                unsubCursos = query.onSnapshot(renderCursos);
-            } else {
-                query.get().then(renderCursos).catch(function() {
+        function loadCursos() {
+            fetch(API + '/cursos/')
+                .then(function(r) { return r.json(); })
+                .then(renderCursos)
+                .catch(function() {
                     document.getElementById('cursos-list').innerHTML =
                         '<p class="cursos-empty">No se pudo cargar el contenido.</p>';
                 });
-            }
         }
 
-        // ── Auth state ────────────────────────────────────────────────────────
-        auth.onAuthStateChanged(async function(user) {
-            if (user) {
-                var snap = await db.collection('usuarios').doc(user.uid).get();
-                var rol  = snap.exists ? snap.data().rol : '';
-                if (rol === 'admin' || rol === 'super_admin') {
-                    currentUserRol = rol;
-                    document.body.classList.add('admin-mode');
-                    document.getElementById('admin-toolbar').style.display = 'block';
-                    var badgeLabel = document.getElementById('admin-badge-label');
-                    if (badgeLabel) badgeLabel.textContent = 'ADMIN';
-                    var portalLink = document.getElementById('nav-portal-link');
-                    if (portalLink) {
-                        portalLink.textContent = snap.data().nombre || 'MI PORTAL';
-                        portalLink.href = 'efectivos.html';
-                    }
-                    loadCursos(true);
-                    return;
-                }
+        // ── Verificar admin al cargar ─────────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', function() {
+            if (isAdmin() && getToken()) {
+                currentUserRol = 'admin';
+                document.body.classList.add('admin-mode');
+                document.getElementById('admin-toolbar').style.display = 'block';
             }
-            currentUserRol = null;
-            document.body.classList.remove('admin-mode');
-            document.getElementById('admin-toolbar').style.display = 'none';
-            loadCursos(false);
-
+            loadCursos();
         });
 
-        // ── Logout ────────────────────────────────────────────────────────────
-        async function adminLogout() {
-            await auth.signOut();
+        // ── Login Django (para admins) ─────────────────────────────────────────
+        function adminLoginDjango() {
+            var user = prompt('Usuario Django:');
+            if (!user) return;
+            var pass = prompt('Contraseña:');
+            if (!pass) return;
+            fetch(API + '/login/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.token) {
+                    localStorage.setItem('django_token', data.token);
+                    localStorage.setItem('django_is_admin', data.is_admin);
+                    window.location.reload();
+                } else {
+                    alert('Credenciales incorrectas.');
+                }
+            });
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('django_token');
+            localStorage.removeItem('django_is_admin');
             window.location.reload();
         }
 
@@ -411,7 +504,7 @@
         function closeAddModal() {
             document.getElementById('add-modal').classList.remove('visible');
         }
-        async function saveAdd() {
+        function saveAdd() {
             var titulo      = document.getElementById('add-titulo').value.trim();
             var tipo        = document.getElementById('add-tipo').value;
             var descripcion = document.getElementById('add-descripcion').value.trim();
@@ -419,47 +512,130 @@
             if (!titulo) { alert('El título es obligatorio.'); return; }
             var btn = document.getElementById('add-btn-save');
             btn.disabled = true; btn.textContent = 'Guardando...';
-            await db.collection('cursos').add({
-                titulo: titulo, tipo: tipo, descripcion: descripcion, url: url,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            fetch(API + '/cursos/', {
+                method: 'POST',
+                headers: authHeaders(),
+                body: JSON.stringify({ titulo: titulo, tipo: tipo, descripcion: descripcion, url: url })
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error('Error al guardar');
+                return r.json();
+            })
+            .then(function() {
+                btn.disabled = false; btn.textContent = 'AGREGAR';
+                document.getElementById('add-success').style.display = 'block';
+                loadCursos();
+                setTimeout(closeAddModal, 1200);
+            })
+            .catch(function() {
+                btn.disabled = false; btn.textContent = 'AGREGAR';
+                alert('Error al guardar. Verifica que el servidor esté corriendo.');
             });
-            btn.disabled = false; btn.textContent = 'AGREGAR';
-            document.getElementById('add-success').style.display = 'block';
-            setTimeout(closeAddModal, 1200);
         }
 
         // ── Modal editar ──────────────────────────────────────────────────────
-        async function openEdit(docId) {
-            editDocId = docId;
-            var snap = await db.collection('cursos').doc(docId).get();
-            var c = snap.data();
-            document.getElementById('edit-tipo').value        = c.tipo        || 'Curso';
-            document.getElementById('edit-titulo').value      = c.titulo      || '';
-            document.getElementById('edit-descripcion').value = c.descripcion || '';
-            document.getElementById('edit-url').value         = c.url         || '';
-            document.getElementById('edit-modal').classList.add('visible');
+        function openEdit(id) {
+            editCursoId = id;
+            fetch(API + '/cursos/' + id + '/')
+                .then(function(r) { return r.json(); })
+                .then(function(c) {
+                    document.getElementById('edit-tipo').value        = c.tipo        || 'Curso';
+                    document.getElementById('edit-titulo').value      = c.titulo      || '';
+                    document.getElementById('edit-descripcion').value = c.descripcion || '';
+                    document.getElementById('edit-url').value         = c.url         || '';
+                    document.getElementById('edit-modal').classList.add('visible');
+                });
         }
         function closeEditModal() {
             document.getElementById('edit-modal').classList.remove('visible');
-            editDocId = null;
+            editCursoId = null;
         }
-        async function saveEdit() {
-            if (!editDocId) return;
+        function saveEdit() {
+            if (!editCursoId) return;
             var titulo = document.getElementById('edit-titulo').value.trim();
             if (!titulo) { alert('El título es obligatorio.'); return; }
-            await db.collection('cursos').doc(editDocId).update({
-                tipo:        document.getElementById('edit-tipo').value,
-                titulo:      titulo,
-                descripcion: document.getElementById('edit-descripcion').value.trim(),
-                url:         document.getElementById('edit-url').value.trim()
-            });
-            closeEditModal();
+            fetch(API + '/cursos/' + editCursoId + '/', {
+                method: 'PATCH',
+                headers: authHeaders(),
+                body: JSON.stringify({
+                    tipo:        document.getElementById('edit-tipo').value,
+                    titulo:      titulo,
+                    descripcion: document.getElementById('edit-descripcion').value.trim(),
+                    url:         document.getElementById('edit-url').value.trim()
+                })
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error();
+                loadCursos();
+                closeEditModal();
+            })
+            .catch(function() { alert('Error al editar.'); });
         }
 
         // ── Eliminar ──────────────────────────────────────────────────────────
-        async function deleteCurso(docId, titulo) {
+        function deleteCurso(id, titulo) {
             if (!confirm('¿Quitar "' + titulo + '"? Esta acción no se puede deshacer.')) return;
-            await db.collection('cursos').doc(docId).delete();
+            fetch(API + '/cursos/' + id + '/', {
+                method: 'DELETE',
+                headers: authHeaders()
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error();
+                loadCursos();
+            })
+            .catch(function() { alert('Error al eliminar.'); });
+        }
+
+        // ── Acciones en tarjetas fijas (solo admin) ────────────────────────────
+        function editarFija(btn, tituloActual, urlActual) {
+            var card = btn.closest('.curso-card');
+            editarFija._card = card;
+            var pTipo = card.querySelector('p.card-tipo');
+            var pDesc = card.querySelector('p.card-desc');
+            document.getElementById('edit-tipo').value        = pTipo ? pTipo.textContent.trim() : 'Curso';
+            document.getElementById('edit-titulo').value      = tituloActual;
+            document.getElementById('edit-descripcion').value = pDesc ? pDesc.textContent.trim() : '';
+            document.getElementById('edit-url').value         = urlActual;
+            // Cambiar el comportamiento del botón guardar para esta card fija
+            var btnGuardar = document.querySelector('#edit-modal .btn-modal-save');
+            btnGuardar.onclick = function() { guardarFija(); };
+            document.getElementById('edit-modal').classList.add('visible');
+        }
+
+        function guardarFija() {
+            var card = editarFija._card;
+            if (!card) return;
+            var titulo = document.getElementById('edit-titulo').value.trim();
+            var url    = document.getElementById('edit-url').value.trim();
+            var tipo   = document.getElementById('edit-tipo').value.trim();
+            var desc   = document.getElementById('edit-descripcion').value.trim();
+            if (!titulo) { alert('El título es obligatorio.'); return; }
+            card.querySelector('h3').textContent = titulo;
+            // Actualizar o crear el párrafo de tipo
+            var pTipo = card.querySelector('p.card-tipo');
+            if (!pTipo) { pTipo = document.createElement('p'); pTipo.className = 'card-tipo'; pTipo.style.cssText = 'color:#d32f2f;font-size:0.82em;font-weight:700;margin-bottom:6px;'; card.querySelector('h3').after(pTipo); }
+            pTipo.textContent = tipo;
+            // Actualizar o crear el párrafo de descripción
+            var pDesc = card.querySelector('p.card-desc');
+            if (desc) {
+                if (!pDesc) { pDesc = document.createElement('p'); pDesc.className = 'card-desc'; pTipo.after(pDesc); }
+                pDesc.textContent = desc;
+            } else if (pDesc) { pDesc.remove(); }
+            var link = card.querySelector('.curso-card-link');
+            if (link) { link.href = url; }
+            var btnEdit = card.querySelector('.btn-card-edit');
+            if (btnEdit) btnEdit.setAttribute('onclick', 'editarFija(this, \'' + titulo.replace(/'/g,"\\'") + '\', \'' + url.replace(/'/g,"\\'") + '\')');
+            var btnDel = card.querySelector('.btn-card-delete');
+            if (btnDel) btnDel.setAttribute('onclick', 'eliminarFija(this, \'' + titulo.replace(/'/g,"\\'") + '\')');
+            closeEditModal();
+            // Restaurar el botón guardar al comportamiento normal del modal
+            document.querySelector('#edit-modal .btn-modal-save').onclick = function() { saveEdit(); };
+            editarFija._card = null;
+        }
+
+        function eliminarFija(btn, titulo) {
+            if (!confirm('¿Quitar "' + titulo + '"? Esta acción no se puede deshacer.')) return;
+            btn.closest('.curso-card').remove();
         }
     </script>
     <script src="script.js"></script>

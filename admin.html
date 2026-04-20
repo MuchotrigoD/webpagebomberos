@@ -408,15 +408,10 @@
             .news-item-admin { flex-direction: column; }
         }
     </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
 </head>
 <body>
 
-    <!-- ── Carga inicial (tapa todo hasta que Firebase resuelva) ── -->
+    <!-- ── Carga inicial ── -->
     <div id="init-loading">
         <div class="spinner"></div>
         <p>Verificando acceso...</p>
@@ -465,10 +460,115 @@
     </div>
 
     <script>
-        var currentUserRol = null;
+        var API = 'http://127.0.0.1:8000/api';
+        function getToken()  { return localStorage.getItem('django_token'); }
+        function isAdmin()   { return localStorage.getItem('django_is_admin') === 'true'; }
 
-        var GRADOS = ['Postulante','Seccionario','Sub Teniente','Teniente','Teniente Brigadier','Brigadier'];
-        var ROLES_LABEL = { 'efectivo': 'Efectivo', 'admin': 'Administrador', 'super_admin': 'Administrador' };
+        var GRADOS = ['Postulante','Seccionario','Sub Teniente','Teniente','Sub Brigadier','Brigadier'];
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!getToken() || !isAdmin()) {
+                document.getElementById('init-loading').style.display = 'none';
+                document.getElementById('no-access').style.display    = 'flex';
+            } else {
+                document.getElementById('init-loading').style.display = 'none';
+                showAdminPanel();
+            }
+        });
+
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted) {
+                if (!getToken() || !isAdmin()) {
+                    document.getElementById('init-loading').style.display = 'none';
+                    document.getElementById('admin-panel').style.display  = 'none';
+                    document.getElementById('no-access').style.display    = 'flex';
+                }
+            }
+        });
+
+        // ── Logout ────────────────────────────────────────────────────────────
+        function logout() {
+            localStorage.removeItem('django_token');
+            localStorage.removeItem('django_is_admin');
+            window.location.replace('noticias.html');
+        }
+
+        // ── Mostrar panel ─────────────────────────────────────────────────────
+        function showAdminPanel() {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('rol-badge').textContent     = 'ADMINISTRADOR';
+            document.getElementById('rol-badge').style.background = '#555';
+            loadUsers();
+        }
+
+        // ── Cargar efectivos ──────────────────────────────────────────────────
+        async function loadUsers() {
+            var container = document.getElementById('users-admin-list');
+            container.innerHTML = '<p style="color:#aaa;">Cargando efectivos...</p>';
+            try {
+                var res  = await fetch(API + '/efectivos/', {
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                if (res.status === 401 || res.status === 403) { logout(); return; }
+                var data = await res.json();
+                if (!data.length) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay efectivos registrados.</p>';
+                    return;
+                }
+                var html = '';
+                data.forEach(function(u) {
+                    var gradoOpts = GRADOS.map(function(g) {
+                        return '<option value="'+g+'"'+(u.grado===g?' selected':'')+'>'+g+'</option>';
+                    }).join('');
+                    html += '<div class="news-item-admin">' +
+                        '<div class="news-item-info">' +
+                            '<div class="item-date"><span class="rol-tag rol-'+(u.is_staff?'admin':'efectivo')+'">' +
+                            (u.is_staff ? 'Administrador' : 'Efectivo') + '</span></div>' +
+                            '<h4>' + (u.nombre || '') + ' ' + (u.apellido || '') + '</h4>' +
+                            '<p>DNI: ' + (u.dni || '—') + ' | Correo: ' + u.email +
+                            (u.fecha_ingreso ? ' | Ingreso: ' + u.fecha_ingreso : '') + '</p>' +
+                        '</div>' +
+                        '<div class="news-item-actions" style="flex-direction:column;align-items:flex-end;gap:6px">' +
+                            '<select onchange="cambiarGrado('+u.id+',this.value)" style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:0.82em;">' + gradoOpts + '</select>' +
+                            (!u.is_staff
+                                ? '<button class="btn-delete" style="font-size:0.8em;" onclick="eliminarEfectivo('+u.id+',\''+u.nombre+' '+u.apellido+'\')">Eliminar</button>'
+                                : '') +
+                        '</div>' +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p style="color:#e53935;">Error al cargar efectivos.</p>';
+            }
+        }
+
+        // ── Cambiar grado ─────────────────────────────────────────────────────
+        async function cambiarGrado(id, nuevoGrado) {
+            try {
+                await fetch(API + '/efectivos/' + id + '/', {
+                    method: 'PATCH',
+                    headers: {'Content-Type':'application/json','Authorization':'Token '+getToken()},
+                    body: JSON.stringify({grado: nuevoGrado})
+                });
+            } catch(e) { alert('Error al cambiar grado.'); }
+        }
+
+        // ── Eliminar efectivo ─────────────────────────────────────────────────
+        async function eliminarEfectivo(id, nombre) {
+            if (!confirm('¿Eliminar permanentemente a ' + nombre + '?')) return;
+            try {
+                await fetch(API + '/efectivos/' + id + '/', {
+                    method: 'DELETE',
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                loadUsers();
+            } catch(e) { alert('Error al eliminar efectivo.'); }
+        }
+    </script>
+
+</body>
+</html>
 
         // ── Tabs ──────────────────────────────────────────────────────────────
         function switchTab(tab) {
