@@ -176,191 +176,69 @@
     </footer>
 
     <script>
-        function mostrarNombreArchivo(inputId, textoId, boxId) {
-            var file = document.getElementById(inputId).files[0];
-            var txt  = document.getElementById(textoId);
-            var box  = document.getElementById(boxId);
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('El archivo no debe superar 5 MB.');
-                    document.getElementById(inputId).value = '';
-                    txt.textContent = 'Haz clic para adjuntar archivo';
-                    box.classList.remove('file-upload-box--selected');
-                    return;
-                }
-                txt.textContent = file.name;
-                box.classList.add('file-upload-box--selected');
+    function mostrarNombreArchivo(inputId, textoId, boxId) {
+        var file = document.getElementById(inputId).files[0];
+        var txt  = document.getElementById(textoId);
+        var box  = document.getElementById(boxId);
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo no debe superar 5 MB.');
+                document.getElementById(inputId).value = '';
+                txt.textContent = 'Haz clic para adjuntar archivo';
+                box.classList.remove('file-upload-box--selected');
+                return;
             }
+            txt.textContent = file.name;
+            box.classList.add('file-upload-box--selected');
         }
+    }
 
-        document.getElementById('form-postulacion').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            var msg = document.getElementById('form-msg');
-            var btn = this.querySelector('button[type=submit]');
-            btn.disabled = true;
-            btn.textContent = 'Enviando...';
-            msg.style.display = 'none';
+    document.getElementById('form-postulacion').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var msg = document.getElementById('form-msg');
+        var btn = this.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        msg.style.display = 'none';
 
-            try {
-                var datos = {
-                    nombre:            document.getElementById('nombres').value.trim(),
-                    apellido:          document.getElementById('apellidos').value.trim(),
-                    fecha_nacimiento:  document.getElementById('fecha_nacimiento').value || null,
-                    genero:            document.getElementById('genero').value,
-                    dni:               document.getElementById('dni').value.trim(),
-                    telefono:          document.getElementById('telefono').value.trim(),
-                    email:             document.getElementById('email').value.trim(),
-                    direccion:         document.getElementById('direccion').value.trim(),
-                    distrito:          document.getElementById('distrito').value.trim(),
-                    estatura:          document.getElementById('estatura').value || null,
-                    peso:              document.getElementById('peso').value || null,
-                    grado_instruccion: document.getElementById('grado_instruccion').value,
-                    mensaje:           [
-                        document.getElementById('trabajo_oficio') ? 'Oficio: ' + document.getElementById('trabajo_oficio').value.trim() : '',
-                        document.getElementById('empresa') ? 'Empresa: ' + document.getElementById('empresa').value.trim() : '',
-                        document.getElementById('centro_estudios') ? 'Centro: ' + document.getElementById('centro_estudios').value.trim() : ''
-                    ].filter(Boolean).join(' | ')
-                };
+        try {
+            var formData = new FormData(this);
 
-                var res = await fetch('http://127.0.0.1:8000/api/postulaciones/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datos)
-                });
+            var res = await fetch('http://127.0.0.1:8000/api/postulaciones/', {
+                method: 'POST',
+                body: formData
+            });
 
-                if (res.ok) {
-                    msg.style.color = '#2e7d32';
-                    msg.textContent = '¡Postulación enviada con éxito! Nos comunicaremos contigo pronto.';
-                    msg.style.display = 'block';
-                    document.getElementById('form-postulacion').reset();
-                    ['txt-certificado','txt-curriculum'].forEach(function(id) {
-                        var el = document.getElementById(id);
-                        if (el) el.textContent = 'Haz clic para adjuntar archivo';
-                    });
-                    ['box-certificado','box-curriculum'].forEach(function(id) {
-                        var el = document.getElementById(id);
-                        if (el) el.classList.remove('file-upload-box--selected');
-                    });
-                } else {
-                    var err = await res.json();
-                    msg.style.color = '#d32f2f';
-                    msg.textContent = 'Error: ' + JSON.stringify(err);
-                    msg.style.display = 'block';
-                }
-            } catch(err) {
-                msg.style.color = '#d32f2f';
-                msg.textContent = 'Ocurrió un error al enviar. Inténtalo nuevamente.';
-                msg.style.display = 'block';
-            }
-            btn.textContent = 'ENVIAR POSTULACIÓN';
-            btn.disabled = false;
-        });
-    </script>
-    <script src="script.js"></script>
-</body>
-</html>
-
-
-        function mostrarNombreArchivo(inputId, textoId, boxId) {
-            var file = document.getElementById(inputId).files[0];
-            var txt  = document.getElementById(textoId);
-            var box  = document.getElementById(boxId);
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('El archivo no debe superar 5 MB.');
-                    document.getElementById(inputId).value = '';
-                    txt.textContent = 'Haz clic para adjuntar archivo';
-                    box.classList.remove('file-upload-box--selected');
-                    return;
-                }
-                txt.textContent = file.name;
-                box.classList.add('file-upload-box--selected');
-            }
-        }
-
-        async function subirArchivo(storageRef, file) {
-            if (!file) return null;
-            var snapshot = await storageRef.put(file);
-            return await snapshot.ref.getDownloadURL();
-        }
-
-        document.getElementById('form-postulacion').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            var msg = document.getElementById('form-msg');
-            var btn = this.querySelector('button[type=submit]');
-            btn.disabled = true;
-            btn.textContent = 'Enviando...';
-            msg.style.display = 'none';
-
-            try {
-                var docRef = db.collection('postulaciones').doc();
-                var fileCert = document.getElementById('certificado_laboral').files[0] || null;
-                var fileCV   = document.getElementById('curriculum_vitae').files[0] || null;
-
-                var certUrl = null;
-                var cvUrl   = null;
-
-                if (fileCert) {
-                    btn.textContent = 'Subiendo certificado...';
-                    certUrl = await subirArchivo(
-                        storage.ref('postulaciones/' + docRef.id + '/certificado_laboral'),
-                        fileCert
-                    );
-                }
-                if (fileCV) {
-                    btn.textContent = 'Subiendo curriculum...';
-                    cvUrl = await subirArchivo(
-                        storage.ref('postulaciones/' + docRef.id + '/curriculum_vitae'),
-                        fileCV
-                    );
-                }
-
-                btn.textContent = 'Guardando datos...';
-                var datos = {
-                    nombres:            document.getElementById('nombres').value.trim(),
-                    apellidos:          document.getElementById('apellidos').value.trim(),
-                    fecha_nacimiento:   document.getElementById('fecha_nacimiento').value,
-                    genero:             document.getElementById('genero').value,
-                    dni:                document.getElementById('dni').value.trim(),
-                    telefono:           document.getElementById('telefono').value.trim(),
-                    email:              document.getElementById('email').value.trim(),
-                    direccion:          document.getElementById('direccion').value.trim(),
-                    distrito:           document.getElementById('distrito').value.trim(),
-                    estatura:           document.getElementById('estatura').value,
-                    peso:               document.getElementById('peso').value,
-                    grado_instruccion:  document.getElementById('grado_instruccion').value,
-                    centro_estudios:    document.getElementById('centro_estudios').value.trim(),
-                    trabajo_oficio:     document.getElementById('trabajo_oficio').value.trim(),
-                    empresa:            document.getElementById('empresa').value.trim(),
-                    certificado_url:    certUrl,
-                    curriculum_url:     cvUrl,
-                    timestamp:          firebase.firestore.FieldValue.serverTimestamp(),
-                    estado:             'pendiente'
-                };
-
-                await docRef.set(datos);
-
+            if (res.ok) {
                 msg.style.color = '#2e7d32';
                 msg.textContent = '¡Postulación enviada con éxito! Nos comunicaremos contigo pronto.';
                 msg.style.display = 'block';
-                document.getElementById('form-postulacion').reset();
+                this.reset();
                 ['txt-certificado','txt-curriculum'].forEach(function(id) {
-                    document.getElementById(id).textContent = 'Haz clic para adjuntar archivo';
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = 'Haz clic para adjuntar archivo';
                 });
                 ['box-certificado','box-curriculum'].forEach(function(id) {
-                    document.getElementById(id).classList.remove('file-upload-box--selected');
+                    var el = document.getElementById(id);
+                    if (el) el.classList.remove('file-upload-box--selected');
                 });
-                btn.textContent = 'ENVIAR POSTULACIÓN';
-                btn.disabled = false;
-            } catch(err) {
+            } else {
+                var err = await res.json();
                 msg.style.color = '#d32f2f';
-                msg.textContent = 'Ocurrió un error al enviar. Inténtalo nuevamente.';
+                msg.textContent = 'Error: ' + (err.error || JSON.stringify(err));
                 msg.style.display = 'block';
-                btn.textContent = 'ENVIAR POSTULACIÓN';
-                btn.disabled = false;
             }
-        });
+        } catch(err) {
+            msg.style.color = '#d32f2f';
+            msg.textContent = 'Ocurrió un error al enviar. Inténtalo nuevamente.';
+            msg.style.display = 'block';
+        }
+        btn.textContent = 'ENVIAR POSTULACIÓN';
+        btn.disabled = false;
+    });
     </script>
     <script src="script.js"></script>
+    <script src="navbar-admin.js"></script>
+    <script src="header-user.js"></script> <!-- Agrega esto antes de </body> -->
 </body>
 </html>

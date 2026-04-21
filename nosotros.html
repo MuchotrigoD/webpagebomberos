@@ -216,9 +216,7 @@
                         <button class="admin-toolbar-btn" onclick="adminLogout()">Cerrar sesión</button>
                     </div>
                 </div>
-                <div id="admin-login-btn" style="text-align:right; margin-bottom:10px; display:none;">
-                    <button class="admin-toolbar-btn" onclick="adminLoginDjango()" style="font-size:0.78em;">Admin Login</button>
-                </div>
+
 
                 <h2>CONOCE A NUESTRO EQUIPO</h2>
                 <p>Conoce al valiente equipo de la Compañía de Bomberos B-120, profesionales dedicados a proteger y servir a nuestra comunidad.</p>
@@ -313,7 +311,7 @@
     <script>
         var API = 'http://127.0.0.1:8000/api';
         function getToken() { return localStorage.getItem('django_token'); }
-        function isAdmin()  { return !!getToken(); }
+        function isAdmin()  { return localStorage.getItem('django_is_admin') === 'true'; }
 
         function authHeaders() {
             return {'Content-Type':'application/json','Authorization':'Token '+getToken()};
@@ -497,5 +495,7 @@
         });
     </script>
     <script src="script.js"></script>
+    <script src="navbar-admin.js"></script>
+    <script src="header-user.js"></script> <!-- Agrega esto antes de </body> -->
 </body>
 </html>

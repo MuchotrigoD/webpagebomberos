@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Guía de Uso — Bomberos B-120</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fafafa; }
+        .container { max-width: 800px; margin: 2rem auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 2rem; }
+        h1, h2 { color: #b71c1c; }
+        .logo { width: 120px; display: block; margin: 0 auto 1rem; }
+        .endpoint { background: #f5f5f5; border-left: 4px solid #b71c1c; padding: 1rem; margin: 1rem 0; border-radius: 4px; }
+        .step { margin-bottom: 1.5rem; }
+        .glossary { background: #f9fbe7; border-left: 4px solid #cddc39; padding: 1rem; border-radius: 4px; }
+        .api-link { color: #1976d2; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="logo.jpg" alt="Logo Bomberos B-120" class="logo">
+        <h1>Bienvenido a la Plataforma de Bomberos B-120</h1>
+        <p>Esta guía te ayudará a entender y usar la plataforma de manera sencilla. Si tienes dudas, contacta al administrador.</p>
+        <h2>¿Cómo acceder?</h2>
+        <div class="step">
+            <strong>1. Página principal:</strong> <br>
+            <a href="/index.html" class="api-link">Ir a la página principal</a>
+        </div>
+        <div class="step">
+            <strong>2. Iniciar sesión o registrarse:</strong> <br>
+            Usa los botones de <b>Login</b> o <b>Registro</b> en la parte superior derecha.
+        </div>
+        <div class="step">
+            <strong>3. Panel de administración:</strong> <br>
+            Si eres admin o superadmin, accede a <a href="/admin/" class="api-link">/admin/</a>.<br>
+            Si tienes problemas para acceder, contacta al soporte para restaurar tus permisos.
+        </div>
+        <h2>Documentación de la API</h2>
+        <div class="step">
+            <strong>Swagger (interactiva):</strong> <a href="/api/swagger/" class="api-link">/api/swagger/</a><br>
+            <strong>Redoc (visual):</strong> <a href="/api/redoc/" class="api-link">/api/redoc/</a>
+        </div>
+        <h2>Glosario</h2>
+        <div class="glossary">
+            <b>API:</b> Puente para que otras aplicaciones se conecten con la plataforma.<br>
+            <b>Admin:</b> Usuario con permisos para gestionar la plataforma.<br>
+            <b>Superadmin:</b> Usuario con todos los permisos, puede crear otros admins.<br>
+        </div>
+        <h2>Ayuda rápida</h2>
+        <ul>
+            <li>¿No puedes acceder? Pide al soporte que te asigne permisos de admin o superadmin.</li>
+            <li>¿No entiendes la API? Usa la guía visual y los ejemplos en Swagger y Redoc.</li>
+            <li>¿Problemas con login/registro? Verifica tu usuario y contraseña, o solicita restablecimiento.</li>
+        </ul>
+    </div>
+</body>
+</html>

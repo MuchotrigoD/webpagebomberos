@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { Curso } from './cursos/curso.entity';
 import { Noticia } from './noticias/noticia.entity';
 import { Postulacion } from './postulaciones/postulacion.entity';
+import { Usuario } from './usuarios/usuario.entity';
+import { UsuariosController } from './usuarios/usuarios.controller';
 
 @Module({
   imports: [
@@ -13,17 +15,17 @@ import { Postulacion } from './postulaciones/postulacion.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT, 10) || 5432,
+      port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Curso, Noticia, Postulacion],
+      entities: [Curso, Noticia, Postulacion, Usuario],
       synchronize: true,
       autoLoadEntities: true,
     }),
-    TypeOrmModule.forFeature([Curso, Noticia, Postulacion]),
+    TypeOrmModule.forFeature([Curso, Noticia, Postulacion, Usuario]),
   ],
-  controllers: [AppController],
+  controllers: [AppController, UsuariosController],
   providers: [AppService],
 })
 export class AppModule {}

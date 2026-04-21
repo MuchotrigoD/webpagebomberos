@@ -6,7 +6,7 @@ class Curso(models.Model):
         ('Manual', 'Manual'),
         ('Documento', 'Documento'),
     ]
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='Curso')
+    tipo = models.CharField(max_length=20, default='Curso')
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
     url = models.URLField(blank=True)
@@ -66,19 +66,9 @@ class Postulacion(models.Model):
 
 
 class Efectivo(models.Model):
-    GRADO_CHOICES = [
-        ('Brigadier', 'Brigadier'),
-        ('Ten. Brigadier', 'Ten. Brigadier'),
-        ('Capitán', 'Capitán'),
-        ('Teniente', 'Teniente'),
-        ('Sub Teniente', 'Sub Teniente'),
-        ('Seccionario', 'Seccionario'),
-        ('Aspirante', 'Aspirante'),
-        ('Postulante', 'Postulante'),
-    ]
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='efectivo')
     dni = models.CharField(max_length=20, blank=True)
-    grado = models.CharField(max_length=50, choices=GRADO_CHOICES, blank=True)
+    grado = models.CharField(max_length=50, blank=True)
     descripcion = models.TextField(blank=True)
     fecha_ingreso = models.DateField(null=True, blank=True)
     foto_url = models.URLField(blank=True, max_length=500)

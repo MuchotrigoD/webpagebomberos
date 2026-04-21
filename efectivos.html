@@ -383,7 +383,30 @@
                         </ul>
                     </li>
                     <li><a href="contacto.html">CONTACTO</a></li>
-                    <li><a href="efectivos.html" class="menu-portal active">LOGIN</a></li>
+                    <li><a href="efectivos.html" class="menu-portal active" id="header-user-btn">LOGIN</a></li>
+                    <style>
+                        .menu-portal.user-initials {
+                            display: inline-flex !important;
+                            align-items: center;
+                            justify-content: center;
+                            width: 38px;
+                            height: 38px;
+                            border-radius: 50%;
+                            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+                            color: #fff;
+                            font-weight: 900;
+                            font-size: 1.1em;
+                            letter-spacing: 1px;
+                            box-shadow: 0 2px 8px rgba(211,47,47,0.18);
+                            transition: background 0.2s;
+                            text-align: center;
+                            padding: 0;
+                        }
+                        .menu-portal.user-initials:hover {
+                            background: #b71c1c;
+                            color: #fff;
+                        }
+                    </style>
                 </ul>
             </nav>
         </div>
@@ -402,30 +425,40 @@
 
                 <div class="tabs">
                     <button class="tab-btn active" onclick="switchTab('login')">Iniciar Sesión</button>
-                    <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
+                    <button class="tab-btn" onclick="switchTab('register')">Solicitar ingreso</button>
                 </div>
+
+
 
                 <!-- ── LOGIN ── -->
                 <div id="tab-login" class="tab-content active">
                     <div class="error-msg" id="login-error"></div>
-                    <div class="form-group">
-                        <label>Correo electrónico</label>
-                        <input type="email" id="login-email" placeholder="tucorreo@email.com" onkeydown="if(event.key==='Enter') doLogin()">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" id="login-pass" placeholder="Tu contraseña" onkeydown="if(event.key==='Enter') doLogin()">
-                    </div>
-                    <button class="submit-btn" onclick="doLogin()">INGRESAR</button>
+                    <form onsubmit="event.preventDefault(); doLogin();">
+                        <div class="form-group">
+                            <label>Correo electrónico</label>
+                            <input type="email" id="login-email" placeholder="tucorreo@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="login-pass" placeholder="Tu contraseña" required>
+                        </div>
+                        <button class="submit-btn" type="submit">INGRESAR</button>
+                    </form>
                     <p style="text-align:center; font-size:0.8em; color:#aaa; margin-top:14px;">
-                        ¿No tienes cuenta? <a href="#" onclick="switchTab('register')" style="color:#d32f2f; font-weight:700;">Regístrate</a>
+                        ¿No tienes cuenta? <a href="#" onclick="switchTab('register')" style="color:#d32f2f; font-weight:700;">Solicita tu ingreso</a>
                     </p>
                 </div>
+                <!-- Campos de contraseña van justo antes del botón ENVIAR SOLICITUD -->
+                <div class="form-group">
+                </div>
+                <div class="form-group">
+                </div>
 
-                <!-- ── REGISTRO ── -->
+
+                <!-- ── SOLICITUD DE INGRESO ── -->
                 <div id="tab-register" class="tab-content">
                     <div class="error-msg" id="register-error"></div>
-                    <div class="success-msg-box" id="register-success">Registro exitoso. Ya puedes iniciar sesión.</div>
+                    <div class="success-msg-box" id="register-success">Solicitud enviada. Un administrador revisará tu postulación.</div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nombre</label>
@@ -497,17 +530,15 @@
                         <label>Fecha de ingreso a la compañía</label>
                         <input type="date" id="reg-fecha-ingreso">
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Contraseña</label>
-                            <input type="password" id="reg-pass" placeholder="Mín. 10 caracteres" maxlength="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Repetir contraseña</label>
-                            <input type="password" id="reg-pass2" placeholder="Repetir" maxlength="100">
-                        </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="reg-pass" placeholder="Contraseña (mín. 10 caracteres)">
                     </div>
-                    <button class="submit-btn" onclick="doRegister()">REGISTRARME</button>
+                    <div class="form-group">
+                        <label>Repetir contraseña</label>
+                        <input type="password" id="reg-pass2" placeholder="Repite la contraseña">
+                    </div>
+                    <button class="submit-btn" onclick="doRegister()">ENVIAR SOLICITUD</button>
                     <p style="text-align:center; font-size:0.8em; color:#aaa; margin-top:14px;">
                         ¿Ya tienes cuenta? <a href="#" onclick="switchTab('login')" style="color:#d32f2f; font-weight:700;">Inicia sesión</a>
                     </p>
@@ -531,7 +562,7 @@
                 <div class="dash-body">
                     <div class="avatar" id="dash-avatar">JB</div>
                     <img id="dash-foto" src="" alt="Foto de perfil" style="display:none; width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #d32f2f; margin:0 auto 12px; display:block;">
-                    <div class="efectivo-name" id="dash-name">Juan Bombero</div>
+                    <div class="efectivo-name" id="dash-name">Bienvenido</div>
                     <div class="efectivo-rank" id="dash-rank">Voluntario</div>
                     <div id="dash-descripcion" style="text-align:center; color:#666; font-size:0.88em; margin-bottom:14px; display:none;"></div>
 
@@ -557,14 +588,15 @@
                             <div class="info-value"><span class="badge-status">Activo</span></div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">Rol</div>
+                            <div class="info-label">Grado</div>
                             <div class="info-value" id="dash-rol">—</div>
                         </div>
                     </div>
 
-                    <div class="dash-btns">
+                    <div class="dash-btns" id="dash-btns">
                         <button class="btn-outline" onclick="toggleChangePass()">Cambiar contraseña</button>
                         <button class="btn-red" onclick="doLogout()">Cerrar sesión</button>
+                        <button class="btn-outline" id="drf-btn" style="display:none;margin-top:8px;" onclick="window.open('http://127.0.0.1:8000/api/', '_blank')">Django REST Framework</button>
                     </div>
 
                     <!-- Cambiar contraseña -->
@@ -588,7 +620,7 @@
     </div>
 
     <script>
-        var API = 'http://127.0.0.1:8000/api';
+        var API = 'http://127.0.0.1:3000/api';
 
         // ── Helpers ───────────────────────────────────────────────────────────
         function getToken() { return localStorage.getItem('django_token'); }
@@ -602,7 +634,34 @@
             } else {
                 showViews('auth');
             }
+            updateHeaderUser();
         });
+        function updateHeaderUser() {
+            var menuPortal = document.querySelector('.menu-portal');
+            if (!menuPortal) return;
+            if (isLoggedIn()) {
+                var initials = '';
+                try {
+                    var nombre = localStorage.getItem('user_nombre') || '';
+                    var apellido = localStorage.getItem('user_apellido') || '';
+                    initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase() || '?';
+                } catch { initials = '?'; }
+                menuPortal.textContent = initials;
+                menuPortal.classList.add('user-initials');
+                menuPortal.href = '#';
+                menuPortal.onclick = function(e) {
+                    e.preventDefault();
+                    doLogout();
+                };
+                menuPortal.title = 'Cerrar sesión';
+            } else {
+                menuPortal.textContent = 'LOGIN';
+                menuPortal.classList.remove('user-initials');
+                menuPortal.href = 'efectivos.html';
+                menuPortal.onclick = null;
+                menuPortal.title = '';
+            }
+        }
 
         window.addEventListener('pageshow', function(e) {
             if (e.persisted && !isLoggedIn()) { showViews('auth'); switchTab('login'); }
@@ -684,6 +743,7 @@
                     document.getElementById('login-pass').value = '';
                 }
             } catch(e) {
+                alert('Error en fetch: ' + e);
                 showError('login-error', 'Error de conexión. Verifica tu red.');
             }
         }
@@ -774,7 +834,19 @@
                 document.getElementById('dash-rank').textContent  = u.grado || '—';
                 document.getElementById('dash-rut').textContent   = u.dni || '—';
                 document.getElementById('dash-email').textContent = u.email || '—';
-                document.getElementById('dash-rol').textContent   = u.is_admin ? 'Administrador' : 'Efectivo';
+                document.getElementById('dash-rol').textContent   = u.grado || (u.is_admin ? 'Administrador' : 'Efectivo');
+                // Guardar iniciales en localStorage para el header
+                localStorage.setItem('user_nombre', nombre);
+                localStorage.setItem('user_apellido', apellido);
+                updateHeaderUser();
+
+                // Mostrar botón DRF solo a admins
+                var drfBtn = document.getElementById('drf-btn');
+                if (u.is_admin) {
+                    drfBtn.style.display = 'block';
+                } else {
+                    drfBtn.style.display = 'none';
+                }
 
                 var dashAvatar = document.getElementById('dash-avatar');
                 var dashFoto   = document.getElementById('dash-foto');
@@ -820,8 +892,11 @@
         function doLogout() {
             localStorage.removeItem('django_token');
             localStorage.removeItem('django_is_admin');
+            localStorage.removeItem('user_nombre');
+            localStorage.removeItem('user_apellido');
             showViews('auth');
             switchTab('login');
+            updateHeaderUser();
         }
 
         // ── Cambiar contraseña ────────────────────────────────────────────────
@@ -868,285 +943,7 @@
         }
     </script>
 
-</body>
-</html>
-            var msgs = {
-                'auth/email-already-in-use':   'Ya existe una cuenta con ese correo.',
-                'auth/invalid-email':           'Correo electrónico inválido.',
-                'auth/weak-password':           'La contraseña debe tener al menos 6 caracteres.',
-                'auth/user-not-found':          'Correo no encontrado. ¿Ya te registraste?',
-                'auth/wrong-password':          'Contraseña incorrecta.',
-                'auth/too-many-requests':       'Demasiados intentos. Intenta más tarde.',
-                'auth/network-request-failed':  'Error de red. Verifica tu conexión.'
-            };
-            return msgs[code] || 'Ocurrió un error. Intenta nuevamente.';
-        }
-
-        // ── Tabs ──────────────────────────────────────────────────────────────
-
-        function switchTab(tab) {
-            ['login','register'].forEach(function(t) {
-                document.getElementById('tab-' + t).classList.remove('active');
-                document.querySelectorAll('.tab-btn')[t === 'login' ? 0 : 1].classList.remove('active');
-            });
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.querySelectorAll('.tab-btn')[tab === 'login' ? 0 : 1].classList.add('active');
-            hideError('login-error');
-            hideError('register-error');
-            document.getElementById('register-success').style.display = 'none';
-        }
-
-        // ── Registro ──────────────────────────────────────────────────────────
-
-        async function doRegister() {
-            hideError('register-error');
-            document.getElementById('register-success').style.display = 'none';
-
-            var nombre       = document.getElementById('reg-nombre').value.trim();
-            var apellido     = document.getElementById('reg-apellido').value.trim();
-            var rut          = document.getElementById('reg-rut').value.trim();
-            var email        = document.getElementById('reg-email').value.trim();
-            var grado        = document.getElementById('reg-grado').value;
-            var descripcion  = document.getElementById('reg-descripcion').value.trim();
-            var fechaIngreso = document.getElementById('reg-fecha-ingreso').value;
-            var anio         = fechaIngreso ? fechaIngreso.split('-')[0] : '';
-            var fotoFile     = document.getElementById('reg-foto').files[0] || null;
-            var pass         = document.getElementById('reg-pass').value;
-            var pass2        = document.getElementById('reg-pass2').value;
-
-            if (!nombre || !apellido || !rut || !email || !grado || !fechaIngreso) {
-                showError('register-error', 'Por favor completa todos los campos obligatorios.');
-                return;
-            }
-            if (pass.length < 10) {
-                showError('register-error', 'La contraseña debe tener al menos 10 caracteres.');
-                return;
-            }
-            if (pass !== pass2) {
-                showError('register-error', 'Las contraseñas no coinciden.');
-                return;
-            }
-
-            try {
-                isRegistering = true;
-
-                // Crear usuario (login automático bloqueado por isRegistering)
-                var cred = await auth.createUserWithEmailAndPassword(email, pass);
-
-                // Subir foto si hay
-                var fotoUrl = '';
-                if (fotoFile) {
-                    try {
-                        var storageRef = firebase.storage().ref('efectivos/' + cred.user.uid + '.' + fotoFile.name.split('.').pop());
-                        await storageRef.put(fotoFile);
-                        fotoUrl = await storageRef.getDownloadURL();
-                    } catch(e) { fotoUrl = ''; }
-                }
-
-                // Guardar datos en Firestore
-                await db.collection('usuarios').doc(cred.user.uid).set({
-                    nombre:       nombre,
-                    apellido:     apellido,
-                    rut:          rut,
-                    email:        email,
-                    grado:        grado,
-                    descripcion:  descripcion,
-                    fechaIngreso: fechaIngreso,
-                    anio:         anio,
-                    fotoUrl:      fotoUrl,
-                    rol:          'efectivo'
-                });
-
-                // Cerrar sesión
-                await auth.signOut();
-
-                // Limpiar campos y mostrar éxito
-                ['reg-nombre','reg-apellido','reg-rut','reg-email','reg-descripcion','reg-fecha-ingreso','reg-pass','reg-pass2'].forEach(function(id){
-                    document.getElementById(id).value = '';
-                });
-                document.getElementById('reg-grado').value = '';
-                document.querySelectorAll('.grado-option').forEach(function(o){ o.classList.remove('selected'); });
-                document.getElementById('reg-foto').value = '';
-                document.getElementById('reg-foto-preview').style.display = 'none';
-                document.getElementById('register-success').style.display = 'block';
-                setTimeout(function(){ switchTab('login'); }, 1800);
-
-            } catch(e) {
-                // Cerrar sesión si algo falló a mitad
-                try { await auth.signOut(); } catch(_) {}
-                isRegistering = false;
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('auth-view').style.display      = 'block';
-                showError('register-error', firebaseErrorMsg(e.code));
-            }
-        }
-
-        // ── Login ─────────────────────────────────────────────────────────────
-
-        async function doLogin() {
-            hideError('login-error');
-            var email = document.getElementById('login-email').value.trim();
-            var pass  = document.getElementById('login-pass').value;
-
-            if (!email || !pass) {
-                showError('login-error', 'Ingresa tu correo y contraseña.');
-                return;
-            }
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch(e) {
-                showError('login-error', firebaseErrorMsg(e.code));
-                document.getElementById('login-pass').value = '';
-            }
-        }
-
-        // ── Logout ────────────────────────────────────────────────────────────
-
-        async function doLogout() {
-            await auth.signOut();
-        }
-
-        // ── Dashboard ─────────────────────────────────────────────────────────
-
-        async function showDashboard(fbUser) {
-            // Abortar si este usuario ya fue deslogueado (condición de carrera)
-            if (!auth.currentUser || auth.currentUser.uid !== fbUser.uid) return;
-
-            // Ocultar login, mostrar spinner mientras se verifica rol
-            document.getElementById('auth-view').style.display    = 'none';
-            document.getElementById('dashboard').style.display    = 'none';
-            document.getElementById('loading-screen').style.display = 'block';
-            document.getElementById('change-pass-section').style.display = 'none';
-
-            try {
-                var snap = await db.collection('usuarios').doc(fbUser.uid).get();
-
-                // Segunda verificación tras el await — el usuario pudo haberse deslogueado
-                if (!auth.currentUser || auth.currentUser.uid !== fbUser.uid) {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('auth-view').style.display = 'block';
-                    return;
-                }
-
-                var u = snap.data();
-
-                // Redirigir inmediatamente si es admin o super_admin
-                if (u.rol === 'super_admin' || u.rol === 'admin') {
-                    window.location.replace('noticias.html');
-                    return;
-                }
-
-                // Solo mostrar dashboard a efectivos normales
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-
-                var initials = u.nombre.charAt(0).toUpperCase() + u.apellido.charAt(0).toUpperCase();
-                // Foto o avatar de iniciales
-                var dashAvatar = document.getElementById('dash-avatar');
-                var dashFoto   = document.getElementById('dash-foto');
-                if (u.fotoUrl) {
-                    dashAvatar.style.display = 'none';
-                    dashFoto.src = u.fotoUrl;
-                    dashFoto.style.display = 'block';
-                } else {
-                    dashAvatar.style.display = 'flex';
-                    dashAvatar.textContent   = initials;
-                    dashFoto.style.display   = 'none';
-                }
-                document.getElementById('dash-name').textContent    = u.nombre + ' ' + u.apellido;
-                document.getElementById('dash-rank').textContent    = u.grado;
-                // Descripción
-                var descEl = document.getElementById('dash-descripcion');
-                if (u.descripcion) {
-                    descEl.textContent = u.descripcion;
-                    descEl.style.display = 'block';
-                } else {
-                    descEl.style.display = 'none';
-                }
-                document.getElementById('dash-rut').textContent     = u.rut;
-                document.getElementById('dash-email').textContent   = u.email;
-                var fechaMostrar = u.fechaIngreso ? u.fechaIngreso.split('-').reverse().join('/') : (u.anio || '—');
-                document.getElementById('dash-anio').textContent    = fechaMostrar;
-                document.getElementById('dash-rol').textContent     = 'Efectivo';
-                var anioBase = u.fechaIngreso ? parseInt(u.fechaIngreso.split('-')[0]) : parseInt(u.anio);
-                var years = new Date().getFullYear() - anioBase;
-                document.getElementById('dash-service').textContent = years > 0 ? years + (years === 1 ? ' año' : ' años') : 'Menos de 1 año';
-            } catch(e) {
-                console.error('Error cargando datos:', e);
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('auth-view').style.display = 'block';
-            }
-        }
-
-        // ── Cambiar contraseña ────────────────────────────────────────────────
-
-        function toggleChangePass() {
-            var sec = document.getElementById('change-pass-section');
-            sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
-            hideError('chpass-error');
-            document.getElementById('chpass-success').style.display = 'none';
-        }
-
-        async function changePass() {
-            hideError('chpass-error');
-            document.getElementById('chpass-success').style.display = 'none';
-            var p1 = document.getElementById('chpass-new').value;
-            var p2 = document.getElementById('chpass-new2').value;
-            if (p1.length < 6) {
-                showError('chpass-error', 'La contraseña debe tener al menos 6 caracteres.');
-                return;
-            }
-            if (p1 !== p2) {
-                showError('chpass-error', 'Las contraseñas no coinciden.');
-                return;
-            }
-            try {
-                await auth.currentUser.updatePassword(p1);
-                document.getElementById('chpass-new').value  = '';
-                document.getElementById('chpass-new2').value = '';
-                document.getElementById('chpass-success').style.display = 'block';
-                setTimeout(function(){ document.getElementById('change-pass-section').style.display = 'none'; }, 2000);
-            } catch(e) {
-                showError('chpass-error', 'Error al actualizar. Vuelve a iniciar sesión e intenta de nuevo.');
-            }
-        }
-
-        // ── Auth state observer ───────────────────────────────────────────────
-
-        var isRegistering = false;
-
-        auth.onAuthStateChanged(function(user) {
-            if (isRegistering) {
-                if (!user) {
-                    // signOut post-registro completado — resetear flag y restaurar UI
-                    isRegistering = false;
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('dashboard').style.display      = 'none';
-                    document.getElementById('auth-view').style.display      = 'block';
-                }
-                return; // bloquear cualquier evento durante el registro
-            }
-            if (user) {
-                showDashboard(user);
-            } else {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display      = 'none';
-                document.getElementById('auth-view').style.display      = 'block';
-                switchTab('login');
-            }
-        });
-
-        // Evitar que bfcache restaure el dashboard al presionar "atrás"
-        window.addEventListener('pageshow', function(e) {
-            if (e.persisted) {
-                document.getElementById('dashboard').style.display      = 'none';
-                document.getElementById('loading-screen').style.display = 'none';
-                if (!auth.currentUser) {
-                    document.getElementById('auth-view').style.display = 'block';
-                }
-            }
-        });
-    </script>
+    <script src="header-user.js"></script> <!-- Agrega esto antes de </body> -->
 
 </body>
 </html>

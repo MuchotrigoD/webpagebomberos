@@ -258,14 +258,7 @@
                         <button class="admin-toolbar-btn danger" onclick="adminLogout()">Cerrar sesión</button>
                     </div>
                 </div>
-                <!-- Botón login admin (visible solo si no está logueado) -->
-                <div id="admin-login-btn" style="text-align:right; margin-bottom:10px;">
-                    <script>
-                        if (!localStorage.getItem('django_token')) {
-                            document.write('<button class="admin-toolbar-btn" onclick="adminLoginDjango()" style="font-size:0.78em;">Admin Login</button>');
-                        }
-                    </script>
-                </div>
+
 
                                 <div style="text-align:center;">
                                     <h2 class="titulo-recuadro">CURSOS Y MANUALES</h2>
@@ -639,5 +632,7 @@
         }
     </script>
     <script src="script.js"></script>
+    <script src="navbar-admin.js"></script>
+    <script src="header-user.js"></script>
 </body>
 </html>

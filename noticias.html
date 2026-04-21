@@ -204,10 +204,7 @@
                         <button class="admin-toolbar-btn danger" onclick="adminLogout()">Cerrar sesión</button>
                     </div>
                 </div>
-                <!-- Botón login admin (visible solo si no está logueado) -->
-                <div id="admin-login-btn" style="text-align:right; margin-bottom:10px;">
-                    <button class="admin-toolbar-btn" onclick="adminLoginDjango()" style="font-size:0.78em;">Admin Login</button>
-                </div>
+
 
                 <h2 style="text-align:center;">NOTICIAS</h2>
                 <p class="services-intro">Mantente informado sobre las últimas actividades, operaciones y eventos de la Compañía de Bomberos B-120. Aquí encontrarás nuestras novedades más recientes.</p>
@@ -310,7 +307,7 @@
 
         // ── Helpers ───────────────────────────────────────────────────────────
         function getToken() { return localStorage.getItem('django_token'); }
-        function isAdmin()  { return !!getToken(); }
+        function isAdmin()  { return localStorage.getItem('django_is_admin') === 'true'; }
 
         function authHeaders() {
             return { 'Content-Type': 'application/json', 'Authorization': 'Token ' + getToken() };
@@ -505,5 +502,7 @@
         });
     </script>
     <script src="script.js"></script>
+    <script src="navbar-admin.js"></script>
+    <script src="header-user.js"></script> <!-- Agrega esto antes de </body> -->
 </body>
 </html>

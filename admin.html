@@ -433,22 +433,31 @@
         <div class="admin-content">
 
             <!-- Gestión de efectivos (admin + super_admin) -->
-                <div class="admin-section" id="section-usuarios">
-                    <h2>Gestión de efectivos</h2>
-                    <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Administra los grados y roles de los efectivos registrados.</p>
-                    <div id="users-admin-list">
-                        <p style="color:#aaa;">Cargando efectivos...</p>
-                    </div>
+            <div class="admin-section" id="section-usuarios">
+                <h2>Gestión de efectivos</h2>
+                <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Administra los grados y roles de los efectivos registrados.</p>
+                <div id="users-admin-list">
+                    <p style="color:#aaa;">Cargando efectivos...</p>
                 </div>
+            </div>
 
-                <!-- Gestión avanzada (solo super_admin) -->
-                <div class="admin-section" id="section-superadmin" style="display:none; border: 2px solid #d32f2f;">
-                    <h2 style="color:#d32f2f;">Control Total — Admin</h2>
-                    <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Puedes cambiar cualquier rol, eliminar efectivos y ver toda la información del sistema.</p>
-                    <div id="superadmin-users-list">
-                        <p style="color:#aaa;">Cargando...</p>
-                    </div>
+            <!-- Gestión de postulaciones -->
+            <div class="admin-section" id="section-postulaciones">
+                <h2>Postulaciones pendientes</h2>
+                <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Aprueba o rechaza solicitudes de ingreso a la compañía.</p>
+                <div id="postulaciones-list">
+                    <p style="color:#aaa;">Cargando postulaciones...</p>
                 </div>
+            </div>
+
+            <!-- Gestión avanzada (solo super_admin) -->
+            <div class="admin-section" id="section-superadmin" style="display:none; border: 2px solid #d32f2f;">
+                <h2 style="color:#d32f2f;">Control Total — Admin</h2>
+                <p style="color:#888; font-size:0.88em; margin-bottom:16px;">Puedes cambiar cualquier rol, eliminar efectivos y ver toda la información del sistema.</p>
+                <div id="superadmin-users-list">
+                    <p style="color:#aaa;">Cargando...</p>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -500,6 +509,71 @@
             document.getElementById('rol-badge').textContent     = 'ADMINISTRADOR';
             document.getElementById('rol-badge').style.background = '#555';
             loadUsers();
+            loadPostulaciones();
+        }
+
+        // ── Cargar postulaciones ───────────────────────────────────────────
+        async function loadPostulaciones() {
+            var container = document.getElementById('postulaciones-list');
+            container.innerHTML = '<p style="color:#aaa;">Cargando postulaciones...</p>';
+            try {
+                var res = await fetch(API + '/postulaciones/?estado=pendiente', {
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                if (res.status === 401 || res.status === 403) { logout(); return; }
+                var data = await res.json();
+                if (!data.length) {
+                    container.innerHTML = '<p style="color:#aaa;">No hay postulaciones pendientes.</p>';
+                    return;
+                }
+                var html = '';
+                data.forEach(function(p) {
+                    html += '<div class="postulacion-item">' +
+                        '<div class="pi-header">' +
+                            '<span class="pi-nombre">' + (p.nombre || '') + ' ' + (p.apellido || '') + '</span>' +
+                            '<span class="pi-estado pendiente">Pendiente</span>' +
+                        '</div>' +
+                        '<div class="pi-grid">' +
+                            '<span><b>DNI:</b> ' + (p.dni || '—') + '</span>' +
+                            '<span><b>Correo:</b> ' + p.email + '</span>' +
+                            '<span><b>Grado:</b> ' + (p.grado_instruccion || '—') + '</span>' +
+                        '</div>' +
+                        '<div class="pi-actions">' +
+                            '<button class="btn-aceptar" onclick="aceptarPostulacion(' + p.id + ')">Aceptar</button>' +
+                            '<button class="btn-rechazar" onclick="rechazarPostulacion(' + p.id + ')">Rechazar</button>' +
+                        '</div>' +
+                    '</div>';
+                });
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p style="color:#e53935;">Error al cargar postulaciones.</p>';
+            }
+        }
+
+        // ── Aceptar postulacion ────────────────────────────────────────────
+        async function aceptarPostulacion(id) {
+            if (!confirm('¿Aceptar esta postulación y crear usuario?')) return;
+            try {
+                var res = await fetch(API + '/postulaciones/' + id + '/aceptar/', {
+                    method: 'POST',
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                if (res.ok) loadPostulaciones();
+                else alert('Error al aceptar postulación.');
+            } catch(e) { alert('Error al aceptar postulación.'); }
+        }
+
+        // ── Rechazar postulacion ───────────────────────────────────────────
+        async function rechazarPostulacion(id) {
+            if (!confirm('¿Rechazar esta postulación?')) return;
+            try {
+                var res = await fetch(API + '/postulaciones/' + id + '/rechazar/', {
+                    method: 'POST',
+                    headers: {'Authorization': 'Token ' + getToken()}
+                });
+                if (res.ok) loadPostulaciones();
+                else alert('Error al rechazar postulación.');
+            } catch(e) { alert('Error al rechazar postulación.'); }
         }
 
         // ── Cargar efectivos ──────────────────────────────────────────────────
@@ -603,127 +677,7 @@
             loadUsers();
         }
 
-        // ── Cargar usuarios (admin y super_admin ven lista con cambio de grado) ─
-        function loadUsers() {
-            db.collection('usuarios').onSnapshot(function(snap) {
-                var container = document.getElementById('users-admin-list');
-                if (snap.empty) {
-                    container.innerHTML = '<p style="color:#aaa;">No hay efectivos registrados.</p>';
-                    return;
-                }
-                var html = '';
-                snap.forEach(function(doc) {
-                    var u = doc.data();
-                    var rolLabel = ROLES_LABEL[u.rol] || u.rol;
-                    var gradoOpts = GRADOS.map(function(g) {
-                        return '<option value="'+g+'"'+(u.grado===g?' selected':'')+'>'+g+'</option>';
-                    }).join('');
-                    html += '<div class="news-item-admin">' +
-                        '<div class="news-item-info">' +
-                            '<div class="item-date"><span class="rol-tag rol-'+u.rol+'">'+rolLabel+'</span></div>' +
-                            '<h4>' + u.nombre + ' ' + u.apellido + '</h4>' +
-                            '<p>DNI: ' + u.rut + ' | Correo: ' + u.email + ' | Ingreso: ' + u.anio + '</p>' +
-                        '</div>' +
-                        '<div class="news-item-actions" style="flex-direction:column;align-items:flex-end;gap:6px">' +
-                            '<select onchange="cambiarGrado(\''+doc.id+'\',this.value)" style="padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:0.82em;">' + gradoOpts + '</select>' +
-                            (u.rol !== 'admin' && u.rol !== 'super_admin'
-                                ? '<button class="btn-primary" style="padding:5px 11px;font-size:0.8em;" onclick="setRol(\''+doc.id+'\',\'admin\')">Hacer admin</button>'
-                                : (u.rol === 'admin' && currentUserRol === 'super_admin' ? '<button class="btn-edit" style="font-size:0.8em;" onclick="setRol(\''+doc.id+'\',\'efectivo\')">Quitar admin</button>' : '')
-                            ) +
-                        '</div>' +
-                    '</div>';
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        // ── Cambiar grado ─────────────────────────────────────────────────────
-        async function cambiarGrado(uid, nuevoGrado) {
-            await db.collection('usuarios').doc(uid).update({ grado: nuevoGrado });
-        }
-
-        // ── Cambiar rol ───────────────────────────────────────────────────────
-        async function setRol(uid, nuevoRol) {
-            var labels = { admin: 'administrador', efectivo: 'efectivo', super_admin: 'administrador' };
-            if (!confirm('¿Cambiar rol a ' + (labels[nuevoRol]||nuevoRol) + '?')) return;
-            await db.collection('usuarios').doc(uid).update({ rol: nuevoRol });
-        }
-
-        // ── Gestión completa solo super_admin ─────────────────────────────────
-        function loadSuperAdminUsers() {
-            db.collection('usuarios').onSnapshot(function(snap) {
-                var container = document.getElementById('superadmin-users-list');
-                if (snap.empty) {
-                    container.innerHTML = '<p style="color:#aaa;">No hay efectivos.</p>';
-                    return;
-                }
-                var html = '';
-                snap.forEach(function(doc) {
-                    var u = doc.data();
-                    var rolLabel = ROLES_LABEL[u.rol] || u.rol;
-                    var rolesOpts = ['efectivo','admin','super_admin'].map(function(r) {
-                        return '<option value="'+r+'"'+(u.rol===r?' selected':'')+'>'+ROLES_LABEL[r]+'</option>';
-                    }).join('');
-                    html += '<div class="news-item-admin" style="border-color:#d32f2f33">' +
-                        '<div class="news-item-info">' +
-                            '<div class="item-date"><span class="rol-tag rol-'+u.rol+'">'+rolLabel+'</span> &mdash; '+u.grado+'</div>' +
-                            '<h4>' + u.nombre + ' ' + u.apellido + '</h4>' +
-                            '<p>DNI: ' + u.rut + ' | Correo: ' + u.email + ' | Ingreso: ' + u.anio + '</p>' +
-                        '</div>' +
-                        '<div class="news-item-actions" style="flex-direction:column;align-items:flex-end;gap:6px">' +
-                            '<select onchange="setRol(\''+doc.id+'\',this.value)" style="padding:5px 8px;border-radius:6px;border:2px solid #d32f2f;font-size:0.82em;">' + rolesOpts + '</select>' +
-                            '<button class="btn-delete" style="font-size:0.8em;" onclick="eliminarEfectivo(\''+doc.id+'\',\''+u.nombre+' '+u.apellido+'\')">Eliminar</button>' +
-                        '</div>' +
-                    '</div>';
-                });
-                container.innerHTML = html;
-            });
-        }
-
-        // ── Eliminar efectivo (solo super_admin) ──────────────────────────────
-        async function eliminarEfectivo(uid, nombre) {
-            if (!confirm('¿Eliminar permanentemente a ' + nombre + '? Esta acción no se puede deshacer.')) return;
-            await db.collection('usuarios').doc(uid).delete();
-        }
-
-        // ── Auth observer ─────────────────────────────────────────────────────
-        function hideLoading() {
-            document.getElementById('init-loading').style.display = 'none';
-        }
-
-        auth.onAuthStateChanged(async function(user) {
-            if (!user) {
-                hideLoading();
-                document.getElementById('admin-panel').style.display = 'none';
-                document.getElementById('no-access').style.display   = 'flex';
-                currentUserRol = null;
-                return;
-            }
-            // Si ya está logueado (sesión activa), verificar rol desde Firestore
-            if (!currentUserRol) {
-                var snap = await db.collection('usuarios').doc(user.uid).get();
-                var rol  = snap.exists ? snap.data().rol : '';
-                if (rol !== 'admin' && rol !== 'super_admin') {
-                    await auth.signOut();
-                    hideLoading();
-                    document.getElementById('no-access').style.display = 'flex';
-                    return;
-                }
-                currentUserRol = rol;
-                hideLoading();
-                showAdminPanel();
-            }
-        });
-
-        // Evitar que bfcache restaure el panel visible al presionar "atrás"
-        window.addEventListener('pageshow', function(e) {
-            if (e.persisted) {
-                document.getElementById('init-loading').style.display = 'flex';
-                document.getElementById('admin-panel').style.display = 'none';
-                document.getElementById('no-access').style.display   = 'none';
-                currentUserRol = null;
-            }
-        });
+        // Código de gestión Django/REST, Firestore eliminado
     </script>
 
 </body>
